@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Sparkles, Copy, Plus, Volume2, Loader2, Square } from "lucide-react"
 import { useRef, useState } from "react"
+import { getSpeechFromText } from "@/lib/tts-service"
 
 interface AIResponseBoxProps {
   suggestions: string[]
@@ -25,26 +26,38 @@ export function AIResponseBox({ suggestions, isLoading, onSelectSuggestion }: AI
 
   const handleSpeak = async (text: string, index: number) => {
     if (speakingIndex === index) {
-      window.speechSynthesis.cancel();
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+        audioRef.current = null;
+      }
       setSpeakingIndex(null);
       setIsLoadingAudio(false);
       return;
     }
-    window.speechSynthesis.cancel();
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current = null;
+    }
     setIsLoadingAudio(true);
     setSpeakingIndex(index);
     try {
-      const utter = new window.SpeechSynthesisUtterance(text);
-      utter.onend = () => {
+      const audioBlob = await getSpeechFromText(text);
+      if (!audioBlob) throw new Error('No audio received');
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audio = new Audio(audioUrl);
+      audioRef.current = audio;
+      audio.onended = () => {
+        URL.revokeObjectURL(audioUrl);
+        audioRef.current = null;
         setSpeakingIndex(null);
         setIsLoadingAudio(false);
       };
-      utter.onerror = () => {
-        setSpeakingIndex(null);
+      audio.onpause = () => {
         setIsLoadingAudio(false);
-        alert('TTS failed.');
       };
-      window.speechSynthesis.speak(utter);
+      await audio.play();
       setIsLoadingAudio(false);
     } catch (error) {
       setSpeakingIndex(null);

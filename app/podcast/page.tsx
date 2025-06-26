@@ -9,6 +9,7 @@ import { Volume2, Loader2, Square } from "lucide-react";
 import { db, auth, provider } from "@/lib/firebase";
 import { collection, addDoc, serverTimestamp, getDocs, orderBy, query, where } from "firebase/firestore";
 import { signInWithPopup, onAuthStateChanged } from "firebase/auth";
+import { getSpeechFromText } from "@/lib/tts-service";
 
 export default function PodcastPage() {
   const [input, setInput] = useState("");
@@ -98,73 +99,39 @@ export default function PodcastPage() {
     }
   }
 
-  function playPodcastWithVoices(podcast: string, onDone: () => void) {
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
-      alert('Speech synthesis not supported.');
-      return;
-    }
-    window.speechSynthesis.cancel();
-
-    const voices = window.speechSynthesis.getVoices().filter(v => v.lang.startsWith('en'));
-    // Pick two distinct voices (male/female if possible)
-    let host1Voice = voices.find(v => v.name.toLowerCase().includes('female')) || voices[0];
-    let host2Voice = voices.find(v => v.name.toLowerCase().includes('male') && v !== host1Voice) || voices[1] || voices[0];
-    if (host1Voice === host2Voice && voices.length > 1) host2Voice = voices[1];
-
-    // Split by Host 1: and Host 2:
-    const lines = podcast.split(/\n/).filter(line => line.trim());
-    const utterances: SpeechSynthesisUtterance[] = [];
-
-    for (const line of lines) {
-      let utter: SpeechSynthesisUtterance | null = null;
-      if (line.startsWith('Host 1:')) {
-        utter = new window.SpeechSynthesisUtterance(line.replace(/^Host 1:\s*/, ''));
-        utter.voice = host1Voice;
-        utter.rate = 1.12;
-        utter.pitch = 1.25;
-      } else if (line.startsWith('Host 2:')) {
-        utter = new window.SpeechSynthesisUtterance(line.replace(/^Host 2:\s*/, ''));
-        utter.voice = host2Voice;
-        utter.rate = 1.05;
-        utter.pitch = 0.85;
-      } else {
-        // Default to Host 1
-        utter = new window.SpeechSynthesisUtterance(line);
-        utter.voice = host1Voice;
-        utter.rate = 1.12;
-        utter.pitch = 1.25;
-      }
-      utterances.push(utter);
-    }
-
-    function speakNext(index: number) {
-      if (index >= utterances.length) {
-        onDone();
-        return;
-      }
-      const utter = utterances[index];
-      utter.onend = () => speakNext(index + 1);
-      utter.onerror = () => onDone();
-      window.speechSynthesis.speak(utter);
-    }
-    speakNext(0);
-  }
-
   async function handleSpeak() {
-    if (speaking) {
-      window.speechSynthesis.cancel();
+    if (speaking && audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current = null;
       setSpeaking(false);
       setIsLoadingAudio(false);
       return;
     }
-    window.speechSynthesis.cancel();
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current = null;
+    }
     setIsLoadingAudio(true);
     setSpeaking(true);
     try {
-      playPodcastWithVoices(podcast, () => {
+      const audioBlob = await getSpeechFromText(podcast);
+      if (!audioBlob) throw new Error('No audio received');
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audio = new Audio(audioUrl);
+      audioRef.current = audio;
+      audio.onended = () => {
+        URL.revokeObjectURL(audioUrl);
+        audioRef.current = null;
         setSpeaking(false);
         setIsLoadingAudio(false);
-      });
+      };
+      audio.onpause = () => {
+        setIsLoadingAudio(false);
+      };
+      await audio.play();
+      setIsLoadingAudio(false);
     } catch (error) {
       setSpeaking(false);
       setIsLoadingAudio(false);
