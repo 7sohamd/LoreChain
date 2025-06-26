@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Search, Filter } from "lucide-react"
 import { LoreCard } from "@/components/lore-card"
-import { auth, db } from "@/lib/firebase"
+import { auth, db, getUserWalletAddress } from "@/lib/firebase"
 import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth"
 import { collection, getDocs, updateDoc, doc, query, where, getDoc, setDoc } from "firebase/firestore"
 
@@ -18,6 +18,8 @@ export default function LorePage() {
   const [userPreference, setUserPreference] = useState<string | null>(null)
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [savingPref, setSavingPref] = useState(false)
+  const [wallets, setWallets] = useState<{ [uid: string]: string | null }>({})
+
   useEffect(() => {
     const checkPreference = async () => {
       let pref = null
@@ -49,6 +51,21 @@ export default function LorePage() {
     }
     fetchStories()
   }, [])
+
+  useEffect(() => {
+    if (stories.length > 0) {
+      const fetchWallets = async () => {
+        const walletMap: { [uid: string]: string | null } = {}
+        await Promise.all(stories.map(async (entry) => {
+          if (entry.authorId && !walletMap[entry.authorId]) {
+            walletMap[entry.authorId] = await getUserWalletAddress(entry.authorId)
+          }
+        }))
+        setWallets(walletMap)
+      }
+      fetchWallets()
+    }
+  }, [stories])
 
   const handleVote = async (storyId: string, type: "up" | "down") => {
     if (!user) {
@@ -190,6 +207,7 @@ export default function LorePage() {
                   isCanon: entry.isMain,
                   votes: (entry.upvotes?.length || 0) - (entry.downvotes?.length || 0),
                   aiGenerated: false,
+                  authorWallet: entry.authorId ? wallets[entry.authorId] : null,
                 }}
               />
               <div className="flex gap-2">

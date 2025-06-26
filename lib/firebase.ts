@@ -1,5 +1,5 @@
 import { initializeApp, getApps } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
+import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 
 const firebaseConfig = {
@@ -14,4 +14,20 @@ const firebaseConfig = {
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const auth = getAuth(app);
-export const provider = new GoogleAuthProvider(); 
+export const provider = new GoogleAuthProvider();
+
+export async function updateUserWalletAddress(uid: string, walletAddress: string) {
+  if (!uid || !walletAddress) return;
+  const userRef = doc(db, 'users', uid);
+  await setDoc(userRef, { walletAddress }, { merge: true });
+}
+
+export async function getUserWalletAddress(uid: string): Promise<string | null> {
+  if (!uid) return null;
+  const userRef = doc(db, 'users', uid);
+  const userSnap = await getDoc(userRef);
+  if (userSnap.exists()) {
+    return userSnap.data().walletAddress || null;
+  }
+  return null;
+} 
