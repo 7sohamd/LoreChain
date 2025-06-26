@@ -1,3 +1,6 @@
+"use client"
+
+import { use, useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -6,32 +9,88 @@ import { Share2, ExternalLink, ArrowLeft, Sparkles } from "lucide-react"
 import Link from "next/link"
 import { VoteButton } from "@/components/vote-button"
 import { CanonStatusBadge } from "@/components/canon-status-badge"
+import { doc, getDoc, updateDoc, collection, query, where, getDocs } from "firebase/firestore"
+import { auth, db } from "@/lib/firebase"
+import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth"
 
-// Mock data - in real app this would come from props/API
-const mockEntry = {
-  id: "1",
-  title: "The Nexus Convergence",
-  content: `The Nexus Convergence began as a whisper in the quantum foam, a subtle disturbance that most dismissed as background radiation. But Dr. Elena Vasquez, working late in her laboratory on Kepler Station, noticed the pattern first—a rhythmic pulse that seemed to echo across multiple dimensional frequencies simultaneously.
+export default function EntryPage({ params }: { params: any }) {
+  const { id } = use(params)
+  const [story, setStory] = useState<any>(null)
+  const [user, setUser] = useState<FirebaseUser | null>(null)
+  const [loading, setLoading] = useState(true)
 
-What started as scientific curiosity quickly became existential terror as reality itself began to fracture. The first signs were small: shadows that fell upward, water that flowed in impossible directions, gravity that seemed to forget its own rules in localized pockets throughout the station.
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, setUser)
+    return () => unsubscribe()
+  }, [])
+  
+  const fetchStory = async () => {
+    if (!id) return
+    const storyRef = doc(db, "stories", id)
+    const storySnap = await getDoc(storyRef)
 
-Within hours, the phenomenon had spread beyond the station. Reports flooded in from across the galaxy—entire star systems where the laws of physics had become... negotiable. On Proxima VII, colonists watched in awe as their dead loved ones walked among them, not as ghosts, but as living beings from parallel timelines where they had never died.
+    if (storySnap.exists()) {
+      setStory({ id: storySnap.id, ...storySnap.data() })
+    } else {
+      console.log("No such document!")
+    }
+    setLoading(false)
+  }
 
-The Convergence, as it came to be known, wasn't destroying reality—it was merging it. Every possible timeline, every quantum possibility that had ever existed, was bleeding through into a single, impossibly complex present. The universe was becoming a palimpsest, with layers of reality written over one another in an endless, beautiful, terrifying manuscript.
+  useEffect(() => {
+    fetchStory()
+  }, [id])
 
-Some say the Convergence was triggered by humanity's first successful experiment with quantum consciousness transfer. Others believe it was the natural result of the universe reaching a critical mass of sentient observation. The truth, like everything else touched by the Convergence, exists in multiple states simultaneously.
+  const handleVote = async (storyId: string, type: "up" | "down") => {
+    if (!user) {
+      alert("Please sign in to vote.")
+      return
+    }
+    const storyRef = doc(db, "stories", storyId)
+    const storySnap = await getDoc(storyRef)
+    if (!storySnap.exists()) return
 
-What we know for certain is that the old universe—the one with fixed rules and predictable outcomes—is gone forever. In its place is something far more wondrous and dangerous: a reality where anything that can be imagined has already happened, somewhere, somewhen, in the infinite tapestry of the Nexus Convergence.`,
-  author: "0x742d...35Bc",
-  type: "Event",
-  isCanon: true,
-  votes: 127,
-  aiGenerated: false,
-  createdAt: "2024-01-15T10:30:00Z",
-  canonizedAt: "2024-01-22T14:45:00Z",
-}
+    const storyData = storySnap.data()
+    const upvotes: string[] = storyData.upvotes || []
+    const downvotes: string[] = storyData.downvotes || []
 
-export default function EntryPage({ params }: { params: { id: string } }) {
+    if (upvotes.includes(user.uid) || downvotes.includes(user.uid)) {
+      alert("You have already voted on this story.")
+      return
+    }
+
+    const newUpvotes = type === "up" ? [...upvotes, user.uid] : upvotes
+    const newDownvotes = type === "down" ? [...downvotes, user.uid] : downvotes
+
+    await updateDoc(storyRef, { upvotes: newUpvotes, downvotes: newDownvotes })
+
+    if (newUpvotes.length >= 5 && !storyData.isMain) {
+        const mainQuery = query(collection(db, "stories"), where("isMain", "==", true));
+        const mainSnapshot = await getDocs(mainQuery);
+        let parentId = null;
+        if (!mainSnapshot.empty) {
+            parentId = mainSnapshot.docs[0].id;
+            await updateDoc(doc(db, "stories", parentId), { isMain: false });
+        }
+        await updateDoc(storyRef, { isMain: true, parentMainId: parentId });
+    }
+
+    fetchStory() // Re-fetch the story to update the UI
+  }
+
+  if (loading) {
+    return <div className="text-center py-12 text-slate-300">Loading story...</div>
+  }
+
+  if (!story) {
+    return <div className="text-center py-12 text-slate-300">Story not found.</div>
+  }
+
+  const upvoteCount = story.upvotes?.length || 0
+  const downvoteCount = story.downvotes?.length || 0
+  const totalVotes = upvoteCount - downvoteCount
+  const hasVoted = user && (story.upvotes?.includes(user.uid) || story.downvotes?.includes(user.uid))
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 py-8">
       <div className="container mx-auto px-4 max-w-4xl">
@@ -48,16 +107,16 @@ export default function EntryPage({ params }: { params: { id: string } }) {
           <CardHeader className="space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
               <div className="space-y-2">
-                <h1 className="text-3xl font-bold text-white leading-tight">{mockEntry.title}</h1>
+                <h1 className="text-3xl font-bold text-white leading-tight">{story.title}</h1>
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge variant="secondary" className="bg-slate-700 text-slate-300">
-                    {mockEntry.type}
+                    {story.category}
                   </Badge>
-                  <CanonStatusBadge isCanon={mockEntry.isCanon} />
-                  {mockEntry.aiGenerated && (
+                  <CanonStatusBadge isCanon={story.isMain} />
+                  {story.aiGenerated && (
                     <Badge variant="outline" className="border-purple-500/50 text-purple-400">
                       <Sparkles className="mr-1 h-3 w-3" />
-                      AI-Assisted
+                      AI
                     </Badge>
                   )}
                 </div>
@@ -67,7 +126,7 @@ export default function EntryPage({ params }: { params: { id: string } }) {
                   <Share2 className="mr-2 h-4 w-4" />
                   Share
                 </Button>
-                {mockEntry.isCanon && (
+                {story.isMain && (
                   <Button
                     variant="outline"
                     size="sm"
@@ -84,7 +143,7 @@ export default function EntryPage({ params }: { params: { id: string } }) {
           <CardContent className="space-y-6">
             {/* Content */}
             <div className="prose prose-invert max-w-none">
-              <div className="text-slate-200 leading-relaxed whitespace-pre-wrap text-lg">{mockEntry.content}</div>
+              <div className="text-slate-200 leading-relaxed whitespace-pre-wrap text-lg">{story.content}</div>
             </div>
 
             <Separator className="bg-slate-700" />
@@ -93,20 +152,20 @@ export default function EntryPage({ params }: { params: { id: string } }) {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 text-sm text-slate-400">
               <div className="space-y-1">
                 <p>
-                  Created by <span className="text-purple-400 font-mono">{mockEntry.author}</span>
+                  Created by <span className="text-purple-400 font-mono">{story.authorName}</span>
                 </p>
-                <p>Submitted on {new Date(mockEntry.createdAt).toLocaleDateString()}</p>
-                {mockEntry.isCanon && mockEntry.canonizedAt && (
-                  <p className="text-green-400">Canonized on {new Date(mockEntry.canonizedAt).toLocaleDateString()}</p>
+                <p>Submitted on {new Date(story.createdAt.toDate()).toLocaleDateString()}</p>
+                {story.isMain && story.canonizedAt && (
+                  <p className="text-green-400">Canonized on {new Date(story.canonizedAt.toDate()).toLocaleDateString()}</p>
                 )}
               </div>
               <div className="text-right">
-                <p className="text-lg font-semibold text-white">{mockEntry.votes} votes</p>
+                <p className="text-lg font-semibold text-white">{totalVotes} votes</p>
               </div>
             </div>
 
             {/* Voting Section */}
-            {!mockEntry.isCanon && (
+            {!story.isMain && (
               <>
                 <Separator className="bg-slate-700" />
                 <div className="space-y-4">
@@ -116,8 +175,8 @@ export default function EntryPage({ params }: { params: { id: string } }) {
                     universe will be approved by community consensus.
                   </p>
                   <div className="flex gap-3">
-                    <VoteButton type="up" count={89} />
-                    <VoteButton type="down" count={12} />
+                    <Button onClick={() => handleVote(story.id, "up")} disabled={!!hasVoted}>Upvote ({upvoteCount})</Button>
+                    <Button onClick={() => handleVote(story.id, "down")} disabled={!!hasVoted}>Downvote ({downvoteCount})</Button>
                   </div>
                 </div>
               </>
