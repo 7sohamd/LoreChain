@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 
 export async function POST(req: NextRequest) {
-  const { text, voiceId = "21m00Tcm4TlvDq8ikWAM" } = await req.json();
+  const { text, voiceId = "21m00Tcm4TlvDq8ikWAM", backgroundMusic = "cinematic" } = await req.json();
 
   const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
     method: "POST",
@@ -14,6 +14,7 @@ export async function POST(req: NextRequest) {
       text,
       model_id: "eleven_monolingual_v1",
       voice_settings: { stability: 0.5, similarity_boost: 0.5 },
+      background_music: backgroundMusic,
     }),
   });
 

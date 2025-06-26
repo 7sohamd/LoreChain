@@ -99,6 +99,19 @@ export default function PodcastPage() {
     }
   }
 
+  function pickBackgroundMusic(text: string) {
+    const lower = text.toLowerCase();
+    if (lower.includes("happy") || lower.includes("joy") || lower.includes("excited")) return "uplifting";
+    if (lower.includes("sad") || lower.includes("cry") || lower.includes("loss")) return "sad";
+    if (lower.includes("mystery") || lower.includes("secret") || lower.includes("unknown")) return "mystery";
+    if (lower.includes("love") || lower.includes("romance") || lower.includes("heart")) return "romantic";
+    if (lower.includes("adventure") || lower.includes("quest") || lower.includes("explore")) return "adventure";
+    if (lower.includes("tense") || lower.includes("danger") || lower.includes("chase")) return "tension";
+    if (lower.includes("relax") || lower.includes("calm") || lower.includes("peace")) return "relaxing";
+    if (lower.includes("epic") || lower.includes("battle") || lower.includes("hero")) return "cinematic";
+    return "cinematic";
+  }
+
   async function handleSpeak() {
     if (speaking && audioRef.current) {
       audioRef.current.pause();
@@ -116,7 +129,8 @@ export default function PodcastPage() {
     setIsLoadingAudio(true);
     setSpeaking(true);
     try {
-      const audioBlob = await getSpeechFromText(podcast);
+      const backgroundMusic = pickBackgroundMusic(podcast);
+      const audioBlob = await getSpeechFromText(podcast, "21m00Tcm4TlvDq8ikWAM", backgroundMusic);
       if (!audioBlob) throw new Error('No audio received');
       const audioUrl = URL.createObjectURL(audioBlob);
       const audio = new Audio(audioUrl);
