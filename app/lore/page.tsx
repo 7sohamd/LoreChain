@@ -85,12 +85,14 @@ export default function LorePage() {
     if (type === "up") upvotes.push(user.uid)
     else downvotes.push(user.uid)
     await updateDoc(storyRef, { upvotes, downvotes })
-    if (upvotes.length >= 1 && !story.isMain) {
+
+    // Promote to main only if upvotes > 5
+    if (upvotes.length > 5 && !story.isMain) {
       const mainQ = query(collection(db, "stories"), where("isMain", "==", true))
       const mainSnap = await getDocs(mainQ)
-      let parentMainId = null
-      if (!mainSnap.empty) parentMainId = mainSnap.docs[0].id
-      await updateDoc(storyRef, { isMain: true, parentMainId })
+      // Promote this story to main
+      await updateDoc(storyRef, { isMain: true, parentMainId: null })
+      // Demote the previous main (if any)
       if (!mainSnap.empty) {
         await updateDoc(doc(db, "stories", mainSnap.docs[0].id), { isMain: false })
       }
@@ -193,44 +195,35 @@ export default function LorePage() {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredStories.map((entry) => (
-            <div key={entry.id} className="flex flex-col gap-2">
-              <LoreCard
-                entry={{
-                  id: entry.id,
-                  title: entry.title,
-                  excerpt: entry.content.slice(0, 120) + (entry.content.length > 120 ? "..." : ""),
-                  author: entry.authorName,
-                  type: entry.category,
-                  isCanon: entry.isMain,
-                  votes: (entry.upvotes?.length || 0) - (entry.downvotes?.length || 0),
-                  aiGenerated: false,
-                  authorWallet: entry.authorId ? wallets[entry.authorId] : null,
-                }}
-              />
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleVote(entry.id, "up")}
-                  disabled={!user || (entry.upvotes?.includes(user?.uid) || entry.downvotes?.includes(user?.uid))}
-                >
-                  Upvote ({entry.upvotes?.length || 0})
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleVote(entry.id, "down")}
-                  disabled={!user || (entry.upvotes?.includes(user?.uid) || entry.downvotes?.includes(user?.uid))}
-                >
-                  Downvote ({entry.downvotes?.length || 0})
-                </Button>
+          {filteredStories.map((entry) => {
+            const hasUpvoted = !!user && entry.upvotes?.includes(user.uid);
+            const hasDownvoted = !!user && entry.downvotes?.includes(user.uid);
+            return (
+              <div key={entry.id} className="flex flex-col gap-2">
+                <LoreCard
+                  entry={{
+                    id: entry.id,
+                    title: entry.title,
+                    excerpt: entry.content.slice(0, 120) + (entry.content.length > 120 ? "..." : ""),
+                    author: entry.authorName,
+                    type: entry.category,
+                    isCanon: entry.isMain,
+                    votes: (entry.upvotes?.length || 0) - (entry.downvotes?.length || 0),
+                    aiGenerated: false,
+                    authorWallet: entry.authorId ? wallets[entry.authorId] : null,
+                    upvotes: entry.upvotes || [],
+                    downvotes: entry.downvotes || [],
+                  }}
+                  onVote={type => handleVote(entry.id, type)}
+                  hasUpvoted={hasUpvoted}
+                  hasDownvoted={hasDownvoted}
+                />
                 {entry.isMain && (
                   <span className="ml-2 text-green-400 font-bold">MAIN STORY</span>
                 )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {filteredStories.length === 0 && (

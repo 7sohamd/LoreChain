@@ -25,7 +25,7 @@ interface LoreCardProps {
   entry: LoreEntry
 }
 
-export function LoreCard({ entry }: LoreCardProps) {
+export function LoreCard({ entry, onVote, hasUpvoted, hasDownvoted }: LoreCardProps) {
   const [tipAmount, setTipAmount] = useState(1)
   const [tipLoading, setTipLoading] = useState(false)
   const [tipSuccess, setTipSuccess] = useState(false)
@@ -101,8 +101,22 @@ export function LoreCard({ entry }: LoreCardProps) {
           <div className="flex items-center justify-between gap-2">
             {!entry.isCanon && (
               <div className="flex gap-1">
-                <VoteButton type="up" count={Math.floor(entry.votes * 0.7)} compact />
-                <VoteButton type="down" count={Math.floor(entry.votes * 0.3)} compact />
+                <VoteButton
+                  type="up"
+                  count={entry.upvotes?.length || 0}
+                  compact
+                  onVote={() => onVote && onVote("up")}
+                  disabled={!!hasUpvoted || !!hasDownvoted}
+                  selected={!!hasUpvoted}
+                />
+                <VoteButton
+                  type="down"
+                  count={entry.downvotes?.length || 0}
+                  compact
+                  onVote={() => onVote && onVote("down")}
+                  disabled={!!hasUpvoted || !!hasDownvoted}
+                  selected={!!hasDownvoted}
+                />
               </div>
             )}
             <Button asChild variant="ghost" size="sm" className="text-purple-400 hover:text-purple-300 ml-auto">
