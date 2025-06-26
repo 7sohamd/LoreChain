@@ -49,8 +49,8 @@ export default function LorePage() {
     if (type === "up") upvotes.push(user.uid)
     else downvotes.push(user.uid)
     await updateDoc(storyRef, { upvotes, downvotes })
-    // If upvotes >= 5 and not main, mark as main and set parentMainId
-    if (upvotes.length >= 5 && !story.isMain) {
+    // If upvotes >= 1 and not main, mark as main and set parentMainId
+    if (upvotes.length >= 1 && !story.isMain) {
       // Find current main story
       const mainQ = query(collection(db, "stories"), where("isMain", "==", true))
       const mainSnap = await getDocs(mainQ)

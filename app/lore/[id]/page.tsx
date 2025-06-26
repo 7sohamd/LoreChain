@@ -1,100 +1,136 @@
 "use client"
 
-import { use, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { Share2, ExternalLink, ArrowLeft, Sparkles } from "lucide-react"
+import { ArrowLeft, Sparkles } from "lucide-react"
 import Link from "next/link"
-import { VoteButton } from "@/components/vote-button"
 import { CanonStatusBadge } from "@/components/canon-status-badge"
-import { doc, getDoc, updateDoc, collection, query, where, getDocs } from "firebase/firestore"
+import {
+  doc, getDoc, updateDoc, collection, query, where,
+  getDocs, addDoc, deleteDoc, Timestamp
+} from "firebase/firestore"
 import { auth, db } from "@/lib/firebase"
 import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth"
 
 export default function EntryPage({ params }: { params: any }) {
-  const { id } = use(params)
+  const { id } = params;
   const [story, setStory] = useState<any>(null)
   const [user, setUser] = useState<FirebaseUser | null>(null)
   const [loading, setLoading] = useState(true)
+  const [addons, setAddons] = useState<any[]>([])
+  const [addonTitle, setAddonTitle] = useState("")
+  const [addonContent, setAddonContent] = useState("")
+  const [addonSubmitting, setAddonSubmitting] = useState(false)
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, setUser)
     return () => unsubscribe()
   }, [])
-  
+
   const fetchStory = async () => {
-    if (!id) return
+    setLoading(true)
     const storyRef = doc(db, "stories", id)
     const storySnap = await getDoc(storyRef)
-
     if (storySnap.exists()) {
       setStory({ id: storySnap.id, ...storySnap.data() })
-    } else {
-      console.log("No such document!")
     }
     setLoading(false)
+  }
+
+  const fetchAddons = async () => {
+    const q = query(collection(db, "stories"), where("parentMainId", "==", id))
+    const querySnapshot = await getDocs(q)
+    const addonsFetched = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+
+    for (const addon of addonsFetched) {
+      if ((addon.upvotes?.length || 0) >= 2) {
+        await mergeAddonIntoStory(addon, addonsFetched)
+        return // exit loop, only one can be merged
+      }
+    }
+
+    setAddons(addonsFetched)
+  }
+
+  const mergeAddonIntoStory = async (addon: any, allAddons: any[]) => {
+    const updatedContent = `${story.content}\n\n---\n\n${addon.title}\n\n${addon.content}\n\n*Contributed by ${addon.authorName}*`
+    await updateDoc(doc(db, "stories", id), {
+      content: updatedContent
+    })
+
+    // Delete all other add-ons
+    for (const a of allAddons) {
+      if (a.id !== addon.id) {
+        await deleteDoc(doc(db, "stories", a.id))
+      }
+    }
+
+    // Delete merged one too
+    await deleteDoc(doc(db, "stories", addon.id))
+
+    // Refresh the main story
+    await fetchStory()
+    setAddons([]) // reset addons
   }
 
   useEffect(() => {
     fetchStory()
   }, [id])
 
-  const handleVote = async (storyId: string, type: "up" | "down") => {
-    if (!user) {
-      alert("Please sign in to vote.")
-      return
+  useEffect(() => {
+    if (story) {
+      fetchAddons()
     }
-    const storyRef = doc(db, "stories", storyId)
-    const storySnap = await getDoc(storyRef)
-    if (!storySnap.exists()) return
+  }, [story])
 
-    const storyData = storySnap.data()
-    const upvotes: string[] = storyData.upvotes || []
-    const downvotes: string[] = storyData.downvotes || []
-
-    if (upvotes.includes(user.uid) || downvotes.includes(user.uid)) {
-      alert("You have already voted on this story.")
-      return
+  const handleAddonSubmit = async () => {
+    if (!user) return alert("Please sign in.")
+    if (!addonTitle || !addonContent) return alert("Fill in all fields.")
+    setAddonSubmitting(true)
+    try {
+      await addDoc(collection(db, "stories"), {
+        title: addonTitle,
+        content: addonContent,
+        category: story.category,
+        authorId: user.uid,
+        authorName: user.displayName || user.email,
+        createdAt: Timestamp.now(),
+        upvotes: [],
+        downvotes: [],
+        isMain: false,
+        parentMainId: id
+      })
+      setAddonTitle("")
+      setAddonContent("")
+      fetchAddons()
+    } catch (err) {
+      alert("Failed to submit add-on.")
     }
-
-    const newUpvotes = type === "up" ? [...upvotes, user.uid] : upvotes
-    const newDownvotes = type === "down" ? [...downvotes, user.uid] : downvotes
-
-    await updateDoc(storyRef, { upvotes: newUpvotes, downvotes: newDownvotes })
-
-    if (newUpvotes.length >= 5 && !storyData.isMain) {
-        const mainQuery = query(collection(db, "stories"), where("isMain", "==", true));
-        const mainSnapshot = await getDocs(mainQuery);
-        let parentId = null;
-        if (!mainSnapshot.empty) {
-            parentId = mainSnapshot.docs[0].id;
-            await updateDoc(doc(db, "stories", parentId), { isMain: false });
-        }
-        await updateDoc(storyRef, { isMain: true, parentMainId: parentId });
-    }
-
-    fetchStory() // Re-fetch the story to update the UI
+    setAddonSubmitting(false)
   }
 
-  if (loading) {
-    return <div className="text-center py-12 text-slate-300">Loading story...</div>
+  const handleAddonVote = async (addonId: string) => {
+    if (!user) return alert("Please sign in.")
+    const ref = doc(db, "stories", addonId)
+    const snap = await getDoc(ref)
+    if (!snap.exists()) return
+    const data = snap.data()
+    const up = data.upvotes || []
+    if (up.includes(user.uid)) return alert("Already voted.")
+    const newUp = [...up, user.uid]
+    await updateDoc(ref, { upvotes: newUp })
+    fetchAddons()
   }
 
-  if (!story) {
-    return <div className="text-center py-12 text-slate-300">Story not found.</div>
-  }
-
-  const upvoteCount = story.upvotes?.length || 0
-  const downvoteCount = story.downvotes?.length || 0
-  const totalVotes = upvoteCount - downvoteCount
-  const hasVoted = user && (story.upvotes?.includes(user.uid) || story.downvotes?.includes(user.uid))
+  if (loading) return <div className="text-center py-12 text-slate-300">Loading story...</div>
+  if (!story) return <div className="text-center py-12 text-slate-300">Story not found.</div>
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 py-8">
       <div className="container mx-auto px-4 max-w-4xl">
-        {/* Back Button */}
         <Button asChild variant="ghost" className="mb-6 text-slate-300 hover:text-white">
           <Link href="/lore">
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -102,127 +138,70 @@ export default function EntryPage({ params }: { params: any }) {
           </Link>
         </Button>
 
-        {/* Main Content */}
         <Card className="bg-slate-800/50 border-slate-700">
-          <CardHeader className="space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-              <div className="space-y-2">
-                <h1 className="text-3xl font-bold text-white leading-tight">{story.title}</h1>
-                <div className="flex flex-wrap items-center gap-2">
-                  <Badge variant="secondary" className="bg-slate-700 text-slate-300">
-                    {story.category}
-                  </Badge>
-                  <CanonStatusBadge isCanon={story.isMain} />
-                  {story.aiGenerated && (
-                    <Badge variant="outline" className="border-purple-500/50 text-purple-400">
-                      <Sparkles className="mr-1 h-3 w-3" />
-                      AI
-                    </Badge>
-                  )}
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" className="border-slate-600 text-slate-300 hover:bg-slate-700">
-                  <Share2 className="mr-2 h-4 w-4" />
-                  Share
-                </Button>
-                {story.isMain && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="border-green-500/50 text-green-400 hover:bg-green-500/10"
-                  >
-                    <ExternalLink className="mr-2 h-4 w-4" />
-                    View on Chain
-                  </Button>
-                )}
-              </div>
+          <CardHeader>
+            <CardTitle className="text-3xl font-bold text-white">{story.title}</CardTitle>
+            <div className="flex gap-2 mt-2">
+              <Badge className="bg-slate-700 text-slate-300">{story.category}</Badge>
+              <CanonStatusBadge isCanon={true} />
+              {story.aiGenerated && (
+                <Badge variant="outline" className="text-purple-400 border-purple-400">
+                  <Sparkles className="w-3 h-3 mr-1" /> AI
+                </Badge>
+              )}
             </div>
           </CardHeader>
 
           <CardContent className="space-y-6">
-            {/* Content */}
-            <div className="prose prose-invert max-w-none">
-              <div className="text-slate-200 leading-relaxed whitespace-pre-wrap text-lg">{story.content}</div>
+            <div className="text-slate-200 text-lg whitespace-pre-wrap">{story.content}</div>
+
+            <div>
+              <h3 className="text-white text-lg font-semibold mb-2">Add to the Story</h3>
+              <input className="w-full mb-2 p-2 rounded bg-slate-700 text-white"
+                placeholder="Add-on Title" value={addonTitle}
+                onChange={e => setAddonTitle(e.target.value)}
+              />
+              <textarea className="w-full mb-2 p-2 rounded bg-slate-700 text-white"
+                placeholder="Continue the story..." rows={4} value={addonContent}
+                onChange={e => setAddonContent(e.target.value)}
+              />
+              <Button onClick={handleAddonSubmit} disabled={addonSubmitting}>
+                {addonSubmitting ? "Submitting..." : "Submit Add-on"}
+              </Button>
             </div>
 
-            <Separator className="bg-slate-700" />
-
-            {/* Author & Metadata */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 text-sm text-slate-400">
-              <div className="space-y-1">
-                <p>
-                  Created by <span className="text-purple-400 font-mono">{story.authorName}</span>
-                </p>
-                <p>Submitted on {new Date(story.createdAt.toDate()).toLocaleDateString()}</p>
-                {story.isMain && story.canonizedAt && (
-                  <p className="text-green-400">Canonized on {new Date(story.canonizedAt.toDate()).toLocaleDateString()}</p>
-                )}
-              </div>
-              <div className="text-right">
-                <p className="text-lg font-semibold text-white">{totalVotes} votes</p>
-              </div>
-            </div>
-
-            {/* Voting Section */}
-            {!story.isMain && (
-              <>
-                <Separator className="bg-slate-700" />
+            {addons.length > 0 && (
+              <div>
+                <h3 className="text-white text-lg font-semibold mb-2">Story Add-ons</h3>
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-white">Community Voting</h3>
-                  <p className="text-slate-300 text-sm">
-                    Help decide if this lore should become part of the official canon. Quality entries that enhance the
-                    universe will be approved by community consensus.
-                  </p>
-                  <div className="flex gap-3">
-                    <Button onClick={() => handleVote(story.id, "up")} disabled={!!hasVoted}>Upvote ({upvoteCount})</Button>
-                    <Button onClick={() => handleVote(story.id, "down")} disabled={!!hasVoted}>Downvote ({downvoteCount})</Button>
-                  </div>
+                  {addons.map(a => (
+                    <Card key={a.id} className="bg-slate-700/60 border-slate-600">
+                      <CardHeader>
+                        <CardTitle className="text-white text-base">{a.title}</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-slate-200">{a.content}</p>
+                        <div className="flex gap-2 items-center mt-2">
+                          <Button size="sm" onClick={() => handleAddonVote(a.id)}>
+                            Upvote ({a.upvotes?.length || 0})
+                          </Button>
+                          <span className="text-xs text-slate-400 ml-2">by {a.authorName}</span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
-              </>
+              </div>
             )}
+
+            <Separator className="bg-slate-700 my-6" />
+
+            <div className="text-sm text-slate-400 space-y-1">
+              <p>Created by <span className="text-purple-400 font-mono">{story.authorName}</span></p>
+              <p>Submitted on {story.createdAt?.toDate ? new Date(story.createdAt.toDate()).toLocaleDateString() : ""}</p>
+            </div>
           </CardContent>
         </Card>
-
-        {/* Related Entries */}
-        <div className="mt-8">
-          <h2 className="text-2xl font-bold text-white mb-4">Related Lore</h2>
-          <div className="grid md:grid-cols-2 gap-4">
-            <Card className="bg-slate-800/30 border-slate-700 hover:border-purple-500/50 transition-colors">
-              <CardHeader>
-                <CardTitle className="text-white text-lg">House Voidwhisper</CardTitle>
-                <Badge variant="secondary" className="w-fit bg-slate-700 text-slate-300">
-                  Faction
-                </Badge>
-              </CardHeader>
-              <CardContent>
-                <p className="text-slate-300 text-sm">
-                  An ancient faction that claims to hear the voices of the void between stars...
-                </p>
-                <Button asChild variant="ghost" size="sm" className="mt-2 text-purple-400 hover:text-purple-300 p-0">
-                  <Link href="/lore/2">Read More →</Link>
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-slate-800/30 border-slate-700 hover:border-purple-500/50 transition-colors">
-              <CardHeader>
-                <CardTitle className="text-white text-lg">The Singing Nebula</CardTitle>
-                <Badge variant="secondary" className="w-fit bg-slate-700 text-slate-300">
-                  Place
-                </Badge>
-              </CardHeader>
-              <CardContent>
-                <p className="text-slate-300 text-sm">
-                  A cosmic phenomenon where stellar gases vibrate at frequencies that create...
-                </p>
-                <Button asChild variant="ghost" size="sm" className="mt-2 text-purple-400 hover:text-purple-300 p-0">
-                  <Link href="/lore/5">Read More →</Link>
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
       </div>
     </div>
   )
