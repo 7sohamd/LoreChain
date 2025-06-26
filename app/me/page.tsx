@@ -11,11 +11,25 @@ import { CanonStatusBadge } from "@/components/canon-status-badge"
 import { auth, db } from "@/lib/firebase"
 import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth"
 import { collection, query, where, getDocs } from "firebase/firestore"
+import { Avatar } from "@/components/ui/avatar"
 
 export default function MyLorePage() {
   const [user, setUser] = useState<FirebaseUser | null>(null)
   const [myStories, setMyStories] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+
+  // Helper to get preview text (first 300 chars or 6 lines)
+  function getPreview(text: string) {
+    const lines = text.split("\n");
+    if (lines.length > 6) {
+      return lines.slice(0, 6).join("\n") + "...";
+    }
+    if (text.length > 300) {
+      return text.slice(0, 300) + "...";
+    }
+    return text;
+  }
+  const [expandedStories, setExpandedStories] = useState<{ [id: string]: boolean }>({});
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, setUser)
@@ -61,13 +75,23 @@ export default function MyLorePage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div>
-                  <p className="text-sm text-slate-400">Email</p>
-                  <p className="text-white font-mono text-sm break-all">user@email.com</p>
+                <div className="flex flex-col items-center gap-2 mb-4">
+                  {user.photoURL ? (
+                    <img
+                      src={user.photoURL}
+                      alt={user.displayName || user.email || "User"}
+                      className="w-20 h-20 rounded-full object-cover border-4 border-purple-500 shadow"
+                    />
+                  ) : (
+                    <div className="w-20 h-20 rounded-full bg-slate-700 flex items-center justify-center text-3xl text-white font-bold">
+                      {user.displayName ? user.displayName[0] : (user.email ? user.email[0] : "U")}
+                    </div>
+                  )}
+                  <div className="text-lg font-bold text-white">{user.displayName || user.email}</div>
                 </div>
                 <div>
-                  <p className="text-sm text-slate-400">Member Since</p>
-                  <p className="text-white">2024-01-01</p>
+                  <p className="text-sm text-slate-400">Email</p>
+                  <p className="text-white font-mono text-sm break-all">{user.email}</p>
                 </div>
                 <Button
                   variant="outline"
@@ -133,7 +157,17 @@ export default function MyLorePage() {
                       <div key={story.id} className="bg-slate-800/50 border-slate-700 rounded-lg p-6">
                         <h2 className="text-xl font-bold text-white mb-2">{story.title}</h2>
                         <div className="text-slate-300 mb-2">{story.category}</div>
-                        <div className="text-slate-200 whitespace-pre-line mb-2">{story.content}</div>
+                        <div className="text-slate-200 whitespace-pre-line mb-2">
+                          {expandedStories[story.id] ? story.content : getPreview(story.content)}
+                          {(story.content.length > 300 || story.content.split("\n").length > 6) && (
+                            <button
+                              className="ml-2 text-purple-400 hover:underline text-xs"
+                              onClick={() => setExpandedStories(prev => ({ ...prev, [story.id]: !prev[story.id] }))}
+                            >
+                              {expandedStories[story.id] ? "See less" : "See more"}
+                            </button>
+                          )}
+                        </div>
                         <div className="text-sm text-slate-400">Upvotes: {story.upvotes?.length || 0} | Downvotes: {story.downvotes?.length || 0}</div>
                         {story.isMain && <div className="text-green-400 font-bold mt-2">MAIN STORY</div>}
                       </div>

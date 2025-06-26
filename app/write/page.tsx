@@ -164,11 +164,14 @@ export default function WritePage() {
                       <SelectValue placeholder="Select a category" />
                     </SelectTrigger>
                     <SelectContent className="bg-slate-800 border-slate-700">
-                      <SelectItem value="character">Character</SelectItem>
-                      <SelectItem value="place">Place</SelectItem>
-                      <SelectItem value="faction">Faction</SelectItem>
+                      <SelectItem value="mystery/crime">Mystery/Crime</SelectItem>
+                      <SelectItem value="fantasy">Fantasy</SelectItem>
+                      <SelectItem value="science fiction">Science Fiction</SelectItem>
+                      <SelectItem value="romance">Romance</SelectItem>
+                      <SelectItem value="thriller/suspense">Thriller/Suspense</SelectItem>
                       <SelectItem value="event">Event</SelectItem>
-                      <SelectItem value="object">Object</SelectItem>
+                      <SelectItem value="horror">Horror</SelectItem>
+                      <SelectItem value="comedy">Comedy</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
