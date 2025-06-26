@@ -112,10 +112,10 @@ export default function LorePage() {
         <div className="mb-8 space-y-4">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[#ffb300]" />
               <Input
                 placeholder="Search lore entries..."
-                className="pl-10 bg-[#fff9de] border-[#f5e6b2] text-[#3d2c00] placeholder:text-[#a3a380]"
+                className="pl-12 py-3 bg-[#fff9de] border-2 border-[#ffb300] text-[#3d2c00] placeholder:text-[#a3a380] rounded-lg shadow-md focus:border-[#3d2c00] focus:ring-2 focus:ring-[#ffb300] transition-all text-base"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
               />

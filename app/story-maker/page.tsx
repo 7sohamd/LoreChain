@@ -217,46 +217,48 @@ export default function StoryMakerPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 py-8 pt-24">
+    <div className="min-h-screen bg-[#fff9de] py-8 pt-24">
       <div className="container mx-auto px-4 max-w-2xl">
-        <h1 className="text-3xl font-bold mb-6 text-center text-white">Story Maker (Educational)</h1>
-        <p className="mb-6 text-slate-300 text-center">
+        <h1 className="text-3xl font-bold mb-6 text-center text-[#3d2c00]">Story Maker (Educational)</h1>
+        <p className="mb-6 text-[#5c4a1a] text-center font-mono">
           Enter a YouTube video URL (any language) or just a topic name. We'll turn it into a simple story anyone can understand!
         </p>
         {!user ? (
           <div className="text-center mt-8">
-            <Button onClick={handleSignIn}>Sign in with Google to use Story Maker</Button>
+            <Button onClick={handleSignIn} className="bg-[#ffb300] text-[#3d2c00] font-bold shadow border border-[#f5e6b2] hover:bg-[#ffd54f]">Sign in with Google to use Story Maker</Button>
           </div>
         ) : (
         <>
-        <form onSubmit={handleSubmit} className="space-y-4 bg-slate-800/60 p-6 rounded-xl shadow-lg">
-          <Input
-            type="text"
-            placeholder="Paste YouTube URL or enter a topic (e.g. Photosynthesis, Binary Search Tree)"
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
-            required
-          />
-          <Button type="submit" className="w-full" disabled={loading || !input}>
-            {loading ? "Generating..." : "Generate Story"}
-          </Button>
-        </form>
-        {error && <div className="mt-4 text-red-400 text-center">{error}</div>}
-        {saveMsg && <div className="mt-4 text-green-400 text-center">{saveMsg}</div>}
+        <div className="mb-10 flex justify-center">
+          <form onSubmit={handleSubmit} className="w-full max-w-xl bg-white border border-[#f5e6b2] p-8 rounded-2xl shadow-xl flex flex-col gap-4">
+            <Input
+              type="text"
+              placeholder="Paste YouTube URL or enter a topic (e.g. Photosynthesis, Binary Search Tree)"
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              className="bg-[#fff9de] border-2 border-[#ffb300] text-[#3d2c00] placeholder:text-[#a3a380] rounded-lg shadow-md focus:border-[#3d2c00] focus:ring-2 focus:ring-[#ffb300] transition-all text-base py-3 px-4"
+              required
+            />
+            <Button type="submit" className="w-full bg-[#ffb300] text-[#3d2c00] font-bold shadow border border-[#f5e6b2] hover:bg-[#ffd54f] hover:text-[#3d2c00] rounded-lg text-lg py-3 transition-all" disabled={loading || !input}>
+              {loading ? "Generating..." : "Generate Story"}
+            </Button>
+          </form>
+        </div>
+        {error && <div className="mt-4 text-red-400 text-center font-mono">{error}</div>}
+        {saveMsg && <div className="mt-4 text-green-400 text-center font-mono">{saveMsg}</div>}
         {story && (
-          <div className="mt-8 bg-slate-900/80 p-6 rounded-xl shadow-lg">
-            <h2 className="text-xl font-semibold mb-2 text-purple-300">Generated Story</h2>
+          <div className="mt-8 bg-white border border-[#f5e6b2] p-6 rounded-xl shadow-lg">
+            <h2 className="text-xl font-semibold mb-2 text-[#3d2c00]">Generated Story</h2>
             <div className="prose prose-invert max-w-none mb-4">
               <ReactMarkdown>{story}</ReactMarkdown>
             </div>
             <div className="flex items-center gap-2 mb-2">
-              <label htmlFor="voice-select" className="text-slate-300 text-sm mr-2">Voice:</label>
+              <label htmlFor="voice-select" className="text-[#5c4a1a] text-sm mr-2 font-mono">Voice:</label>
               <select
                 id="voice-select"
                 value={voiceId}
                 onChange={e => setVoiceId(e.target.value)}
-                className="bg-slate-700 text-slate-200 rounded px-2 py-1 border border-slate-600 focus:outline-none"
+                className="bg-[#fff9de] text-[#3d2c00] rounded px-2 py-1 border border-[#f5e6b2] focus:outline-none font-mono"
               >
                 {ELEVENLABS_VOICES.map(v => (
                   <option key={v.id} value={v.id}>{v.name}</option>
@@ -266,7 +268,7 @@ export default function StoryMakerPage() {
                 onClick={handleSpeak}
                 variant="outline"
                 size="sm"
-                className="border-slate-600 text-slate-300 hover:bg-slate-600"
+                className="border-[#ffb300] text-[#3d2c00] bg-transparent hover:bg-[#ffb300] hover:text-[#3d2c00] font-bold rounded-lg shadow-sm transition-colors"
                 disabled={isLoadingAudio && !speaking}
               >
                 {isLoadingAudio && speaking ? (
@@ -287,12 +289,12 @@ export default function StoryMakerPage() {
         )}
         {/* Past Chats Section */}
         <div className="mt-12">
-          <h2 className="text-2xl font-bold mb-4 text-white">Past Chats</h2>
+          <h2 className="text-2xl font-bold mb-4 text-[#3d2c00]">Past Chats</h2>
           <Input
             placeholder="Search by keyword (e.g. C++, Arrays, DataStructures)"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="mb-4 bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
+            className="mb-6 bg-[#fff9de] border-2 border-[#ffb300] text-[#3d2c00] placeholder:text-[#a3a380] rounded-lg shadow-md focus:border-[#3d2c00] focus:ring-2 focus:ring-[#ffb300] transition-all text-base py-3 px-4"
           />
           <div className="space-y-6">
             {pastChats
@@ -309,35 +311,35 @@ export default function StoryMakerPage() {
                 chat.title.toLowerCase().includes(search.toLowerCase())
               )
               .map((chat) => (
-                <div key={chat.id} className="bg-slate-800/60 p-4 rounded-xl shadow border border-slate-700">
-                  <div className="text-slate-400 text-xs mb-1">
+                <div key={chat.id} className="bg-white border border-[#f5e6b2] p-4 rounded-xl shadow">
+                  <div className="text-[#a3a380] text-xs mb-1 font-mono">
                     {chat.createdAt?.toDate ? chat.createdAt.toDate().toLocaleString() : ""}
                   </div>
                   <div className="flex flex-wrap gap-2 mb-2">
                     {(chat.categories as string[]).map((cat: string) => (
-                      <Badge key={cat} className="bg-blue-700/30 text-blue-200">{cat}</Badge>
+                      <Badge key={cat} className="bg-[#fff9de] border border-[#ffb300] text-[#ffb300] font-mono">{cat}</Badge>
                     ))}
                     {(chat.tags as string[]).map((tag: string) => (
-                      <Badge key={tag} className="bg-purple-700/30 text-purple-200">{tag}</Badge>
+                      <Badge key={tag} className="bg-[#fff9de] border border-[#a3a380] text-[#a3a380] font-mono">{tag}</Badge>
                     ))}
                   </div>
-                  <div className="text-slate-200 font-bold text-lg mb-1">{chat.title}</div>
-                  <div className="text-slate-300 text-sm mb-2">
+                  <div className="text-[#3d2c00] font-bold text-lg mb-1">{chat.title}</div>
+                  <div className="text-[#5c4a1a] text-sm mb-2 font-mono">
                     <b>Input:</b> {chat.input}
                   </div>
                   {expandedChatId === chat.id ? (
-                    <div className="prose prose-invert max-w-none mb-2">
+                    <div className="prose max-w-none mb-2 text-[#5c4a1a] font-mono">
                       <ReactMarkdown>{chat.story}</ReactMarkdown>
                     </div>
                   ) : (
-                    <div className="text-slate-400 text-sm mb-2">
+                    <div className="text-[#a3a380] text-sm mb-2 font-mono">
                       {chat.excerpt}
                     </div>
                   )}
                   <Button
                     size="sm"
                     variant="outline"
-                    className="border-slate-600 text-purple-300 hover:bg-slate-700"
+                    className="border-[#ffb300] text-[#3d2c00] bg-transparent hover:bg-[#ffb300] hover:text-[#3d2c00] font-bold rounded-lg shadow-sm transition-colors"
                     onClick={() => setExpandedChatId(expandedChatId === chat.id ? null : chat.id)}
                   >
                     {expandedChatId === chat.id ? "Hide full chat" : "See full chat"}
