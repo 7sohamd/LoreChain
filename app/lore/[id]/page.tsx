@@ -12,7 +12,7 @@ import {
   doc, getDoc, updateDoc, collection, query, where,
   getDocs, addDoc, deleteDoc, Timestamp
 } from "firebase/firestore"
-import { auth, db } from "@/lib/firebase"
+import { auth, db, getUserWalletAddress } from "@/lib/firebase"
 import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth"
 import { useParams } from "next/navigation"
 
@@ -26,6 +26,7 @@ export default function EntryPage() {
   const [addonTitle, setAddonTitle] = useState("")
   const [addonContent, setAddonContent] = useState("")
   const [addonSubmitting, setAddonSubmitting] = useState(false)
+  const [authorWallet, setAuthorWallet] = useState<string | null>(null)
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, setUser)
@@ -85,6 +86,12 @@ export default function EntryPage() {
   useEffect(() => {
     if (story) {
       fetchAddons()
+    }
+  }, [story])
+
+  useEffect(() => {
+    if (story && story.authorId) {
+      getUserWalletAddress(story.authorId).then(setAuthorWallet)
     }
   }, [story])
 
@@ -215,6 +222,13 @@ export default function EntryPage() {
 
         <div className="text-sm text-black space-y-1 text-right">
           <p>Created by <span className="text-purple-700 font-mono">{story.authorName}</span></p>
+          <p>
+            Wallet: {authorWallet ? (
+              <span className="text-green-700 font-mono">{authorWallet.slice(0, 6)}...{authorWallet.slice(-4)}</span>
+            ) : (
+              <span className="text-slate-400">Not linked</span>
+            )}
+          </p>
           <p>Submitted on {story.createdAt?.toDate ? new Date(story.createdAt.toDate()).toLocaleDateString() : ""}</p>
         </div>
       </div>

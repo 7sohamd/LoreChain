@@ -5,18 +5,26 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Menu, User, LogOut } from "lucide-react"
-import { auth, provider } from "@/lib/firebase"
+import { auth, provider, updateUserWalletAddress } from "@/lib/firebase"
 import type { User as FirebaseUser } from "firebase/auth"
 import { signInWithPopup, signOut, onAuthStateChanged } from "firebase/auth"
+import { useWeb3 } from "@/components/Web3Provider"
 
 export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [user, setUser] = useState<FirebaseUser | null>(null)
+  const { walletAddress, connectWallet, disconnectWallet } = useWeb3()
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, setUser)
     return () => unsubscribe()
   }, [])
+
+  useEffect(() => {
+    if (user && walletAddress) {
+      updateUserWalletAddress(user.uid, walletAddress)
+    }
+  }, [user, walletAddress])
 
   const handleSignIn = async () => {
     try {
@@ -67,12 +75,20 @@ export function Header() {
               ))}
             </nav>
 
-            {/* User Auth */}
+            {/* User Auth + Wallet */}
             <div className="hidden sm:flex items-center space-x-2">
               {user ? (
                 <>
-                  <span className="text-slate-700 font-mono text-sm">{user.displayName || user.email}</span>
-                  <Button variant="ghost" size="sm" onClick={handleSignOut} className="text-blue-700 hover:text-blue-900">
+                  <span className="text-slate-300 font-mono text-sm">{user.displayName || user.email}</span>
+                  {walletAddress ? (
+                    <>
+                      <span className="text-green-400 font-mono text-xs">{walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}</span>
+                      <Button variant="ghost" size="sm" onClick={disconnectWallet} className="text-green-400 hover:text-white">Disconnect Wallet</Button>
+                    </>
+                  ) : (
+                    <Button variant="outline" size="sm" className="text-green-400 border-green-400 hover:text-white" onClick={connectWallet}>Connect Wallet</Button>
+                  )}
+                  <Button variant="ghost" size="sm" onClick={handleSignOut} className="text-slate-400 hover:text-white">
                     <LogOut className="h-4 w-4" />
                   </Button>
                 </>
