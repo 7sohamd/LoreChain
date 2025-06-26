@@ -1,10 +1,10 @@
 // Helper to call the ElevenLabs TTS API route
-export async function getSpeechFromText(text: string, voiceId = "21m00Tcm4TlvDq8ikWAM"): Promise<Blob | null> {
+export async function getSpeechFromText(text: string, voiceId = "21m00Tcm4TlvDq8ikWAM", backgroundMusic = "cinematic"): Promise<Blob | null> {
   try {
     const res = await fetch("/api/elevenlabs-tts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, voiceId }),
+      body: JSON.stringify({ text, voiceId, backgroundMusic }),
     });
     if (!res.ok) throw new Error("TTS API error");
     return await res.blob();
