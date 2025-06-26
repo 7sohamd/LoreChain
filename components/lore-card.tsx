@@ -19,10 +19,15 @@ interface LoreEntry {
   aiGenerated?: boolean
   authorWallet?: string | null
   imageUrl?: string
+  upvotes?: any[]
+  downvotes?: any[]
 }
 
 interface LoreCardProps {
   entry: LoreEntry
+  onVote?: (type: "up" | "down") => void
+  hasUpvoted?: boolean
+  hasDownvoted?: boolean
 }
 
 export function LoreCard({ entry, onVote, hasUpvoted, hasDownvoted }: LoreCardProps) {
@@ -85,9 +90,14 @@ export function LoreCard({ entry, onVote, hasUpvoted, hasDownvoted }: LoreCardPr
       </CardHeader>
 
       <CardContent className="flex-1 flex flex-col">
-        {entry.imageUrl && (
+        {entry.imageUrl && entry.imageUrl.trim() !== "" && (
           <div className="mb-3">
-            <img src={entry.imageUrl} alt={entry.title} className="w-full max-h-48 object-cover rounded border border-[#f5e6b2] mx-auto" />
+            <img
+              src={entry.imageUrl}
+              alt={entry.title}
+              className="w-full max-h-48 object-cover rounded border border-[#f5e6b2] mx-auto"
+              onError={e => { e.currentTarget.style.display = 'none'; }}
+            />
           </div>
         )}
         <CardDescription className="text-slate-300 mb-4 line-clamp-3 flex-1">{entry.excerpt}</CardDescription>
@@ -99,26 +109,24 @@ export function LoreCard({ entry, onVote, hasUpvoted, hasDownvoted }: LoreCardPr
           </div>
 
           <div className="flex items-center justify-between gap-2">
-            {!entry.isCanon && (
-              <div className="flex gap-1">
-                <VoteButton
-                  type="up"
-                  count={entry.upvotes?.length || 0}
-                  compact
-                  onVote={() => onVote && onVote("up")}
-                  disabled={!!hasUpvoted || !!hasDownvoted}
-                  selected={!!hasUpvoted}
-                />
-                <VoteButton
-                  type="down"
-                  count={entry.downvotes?.length || 0}
-                  compact
-                  onVote={() => onVote && onVote("down")}
-                  disabled={!!hasUpvoted || !!hasDownvoted}
-                  selected={!!hasDownvoted}
-                />
-              </div>
-            )}
+            <div className="flex gap-1">
+              <VoteButton
+                type="up"
+                count={entry.upvotes?.length || 0}
+                compact
+                onVote={() => onVote && onVote("up")}
+                disabled={!!hasUpvoted || !!hasDownvoted}
+                selected={!!hasUpvoted}
+              />
+              <VoteButton
+                type="down"
+                count={entry.downvotes?.length || 0}
+                compact
+                onVote={() => onVote && onVote("down")}
+                disabled={!!hasUpvoted || !!hasDownvoted}
+                selected={!!hasDownvoted}
+              />
+            </div>
             <Button asChild variant="ghost" size="sm" className="text-purple-400 hover:text-purple-300 ml-auto">
               <Link href={`/lore/${entry.id}`}>
                 View {entry.isCanon ? "Canon" : "Entry"} <ArrowRight className="ml-1 h-3 w-3" />
