@@ -127,6 +127,13 @@ export default function LorePage() {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {stories.map((entry) => (
             <div key={entry.id} className="flex flex-col gap-2">
+              {entry.coverUrl && (
+                <img
+                  src={entry.coverUrl}
+                  alt="Cover"
+                  className="rounded-lg w-full max-h-48 object-cover border border-slate-700 mb-2"
+                />
+              )}
               <LoreCard
                 entry={{
                   id: entry.id,
