@@ -24,6 +24,9 @@ export default function WritePage() {
   const [showAISuggestions, setShowAISuggestions] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
   const [aiSuggestions, setAISuggestions] = useState<string[]>([])
+  const [imageUrl, setImageUrl] = useState("")
+  const [imageUploading, setImageUploading] = useState(false)
+  const [imageError, setImageError] = useState("")
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
@@ -68,12 +71,14 @@ export default function WritePage() {
         downvotes: [],
         isMain: false,
         parentMainId: null,
+        imageUrl: imageUrl || null,
       })
       alert("Story submitted successfully!")
       // Clear the form
       setTitle("")
       setContent("")
       setCategory("")
+      setImageUrl("")
     } catch (err) {
       console.error(err)
       alert("Failed to submit story.")
@@ -81,6 +86,28 @@ export default function WritePage() {
       setIsSubmitting(false)
     }
   }
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImageUploading(true);
+    setImageError("");
+    const formData = new FormData();
+    formData.append("image", file);
+    try {
+      const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`,
+        { method: "POST", body: formData });
+      const data = await res.json();
+      if (data.success) {
+        setImageUrl(data.data.url);
+      } else {
+        setImageError("Failed to upload image.");
+      }
+    } catch (err) {
+      setImageError("Failed to upload image.");
+    }
+    setImageUploading(false);
+  };
 
   if (loading) {
     return <div className="text-center py-12 text-slate-300">Loading...</div>
@@ -157,6 +184,24 @@ export default function WritePage() {
                     onChange={(e) => setContent(e.target.value)}
                     className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 min-h-[300px] resize-none"
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-white">Attach Image (optional)</Label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="block w-full text-white bg-slate-700 border border-slate-600 rounded px-3 py-2"
+                    disabled={imageUploading}
+                  />
+                  {imageUploading && <div className="text-slate-400 text-sm">Uploading...</div>}
+                  {imageError && <div className="text-red-500 text-sm">{imageError}</div>}
+                  {imageUrl && (
+                    <div className="mt-2">
+                      <img src={imageUrl} alt="Preview" className="max-h-48 rounded border border-slate-600 mx-auto" />
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex gap-3">
