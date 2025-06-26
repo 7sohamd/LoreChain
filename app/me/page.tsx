@@ -18,6 +18,19 @@ export default function MyLorePage() {
   const [myStories, setMyStories] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
+  // Helper to get preview text (first 300 chars or 6 lines)
+  function getPreview(text: string) {
+    const lines = text.split("\n");
+    if (lines.length > 6) {
+      return lines.slice(0, 6).join("\n") + "...";
+    }
+    if (text.length > 300) {
+      return text.slice(0, 300) + "...";
+    }
+    return text;
+  }
+  const [expandedStories, setExpandedStories] = useState<{ [id: string]: boolean }>({});
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, setUser)
     return () => unsubscribe()
@@ -144,7 +157,17 @@ export default function MyLorePage() {
                       <div key={story.id} className="bg-slate-800/50 border-slate-700 rounded-lg p-6">
                         <h2 className="text-xl font-bold text-white mb-2">{story.title}</h2>
                         <div className="text-slate-300 mb-2">{story.category}</div>
-                        <div className="text-slate-200 whitespace-pre-line mb-2">{story.content}</div>
+                        <div className="text-slate-200 whitespace-pre-line mb-2">
+                          {expandedStories[story.id] ? story.content : getPreview(story.content)}
+                          {(story.content.length > 300 || story.content.split("\n").length > 6) && (
+                            <button
+                              className="ml-2 text-purple-400 hover:underline text-xs"
+                              onClick={() => setExpandedStories(prev => ({ ...prev, [story.id]: !prev[story.id] }))}
+                            >
+                              {expandedStories[story.id] ? "See less" : "See more"}
+                            </button>
+                          )}
+                        </div>
                         <div className="text-sm text-slate-400">Upvotes: {story.upvotes?.length || 0} | Downvotes: {story.downvotes?.length || 0}</div>
                         {story.isMain && <div className="text-green-400 font-bold mt-2">MAIN STORY</div>}
                       </div>
