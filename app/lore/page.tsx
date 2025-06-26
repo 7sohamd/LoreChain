@@ -89,12 +89,13 @@ export default function LorePage() {
 
     await updateDoc(storyRef, { upvotes, downvotes })
 
-    if (upvotes.length >= 1 && !story.isMain) {
+    // Promote to main only if upvotes > 5
+    if (upvotes.length > 5 && !story.isMain) {
       const mainQ = query(collection(db, "stories"), where("isMain", "==", true))
       const mainSnap = await getDocs(mainQ)
-      let parentMainId = null
-      if (!mainSnap.empty) parentMainId = mainSnap.docs[0].id
-      await updateDoc(storyRef, { isMain: true, parentMainId })
+      // Promote this story to main
+      await updateDoc(storyRef, { isMain: true, parentMainId: null })
+      // Demote the previous main (if any)
       if (!mainSnap.empty) {
         await updateDoc(doc(db, "stories", mainSnap.docs[0].id), { isMain: false })
       }
@@ -220,27 +221,9 @@ export default function LorePage() {
                   hasUpvoted={hasUpvoted}
                   hasDownvoted={hasDownvoted}
                 />
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleVote(entry.id, "up")}
-                    disabled={!user || (entry.upvotes?.includes(user?.uid) || entry.downvotes?.includes(user?.uid))}
-                  >
-                    Upvote ({entry.upvotes?.length || 0})
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleVote(entry.id, "down")}
-                    disabled={!user || (entry.upvotes?.includes(user?.uid) || entry.downvotes?.includes(user?.uid))}
-                  >
-                    Downvote ({entry.downvotes?.length || 0})
-                  </Button>
-                  {entry.isMain && (
-                    <span className="ml-2 text-green-400 font-bold">MAIN STORY</span>
-                  )}
-                </div>
+                {entry.isMain && (
+                  <span className="ml-2 text-green-400 font-bold">MAIN STORY</span>
+                )}
               </div>
             );
           })}

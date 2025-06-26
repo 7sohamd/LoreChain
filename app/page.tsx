@@ -1,31 +1,41 @@
-"use client";
-
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Pen, Globe, ArrowRight, Sparkles, Vote, CircleIcon as Chain } from "lucide-react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
-import { useEffect, useState } from "react"
-import { collection, getDocs } from "firebase/firestore"
-import { db } from "@/lib/firebase"
+
+const featuredEntries = [
+  {
+    id: "1",
+    title: "The Nexus Convergence",
+    excerpt:
+      "A mysterious event where multiple realities began to bleed into one another, creating pockets of impossible physics and merged timelines...",
+    author: "0x742d...35Bc",
+    type: "Event",
+    isCanon: true,
+  },
+  {
+    id: "2",
+    title: "House Voidwhisper",
+    excerpt:
+      "An ancient faction that claims to hear the voices of the void between stars, using this knowledge to manipulate quantum probabilities...",
+    author: "0x8f3a...91De",
+    type: "Faction",
+    isCanon: true,
+  },
+  {
+    id: "3",
+    title: "The Ethereal Codex",
+    excerpt:
+      "A living document that rewrites itself based on the collective unconscious of nearby sentient beings, containing prophecies that change...",
+    author: "0x1c7b...44Af",
+    type: "Object",
+    isCanon: false,
+  },
+]
 
 export default function HomePage() {
-  const [featuredEntries, setFeaturedEntries] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    async function fetchFeatured() {
-      const querySnapshot = await getDocs(collection(db, "stories"))
-      const allEntries = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-      // Randomly pick 3
-      const shuffled = allEntries.sort(() => 0.5 - Math.random())
-      setFeaturedEntries(shuffled.slice(0, 3))
-      setLoading(false)
-    }
-    fetchFeatured()
-  }, [])
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#fff9de] via-[#fff] to-[#fff9de] relative overflow-hidden">
       {/* Hero Section */}
@@ -42,18 +52,32 @@ export default function HomePage() {
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-[#fff9de] [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]"></div>
         <div className="text-center w-full relative z-10">
           <h1 className="text-6xl md:text-7xl font-bold text-[#3d2c00] mb-6">
-            Write the <span className="bg-gradient-to-r from-blue-400 via-pink-400 to-yellow-300 bg-clip-text text-transparent inline-block">Next Universe</span>. Together.
+            Write the {" "}
+            <span
+              style={{
+                background: "linear-gradient(90deg,#60a5fa,#a78bfa,#fde68a,#f472b6,#fff,#60a5fa)",
+                backgroundSize: "300% 300%",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+                color: "transparent",
+                animation: "glowing-gradient 8s ease-in-out infinite",
+                filter: "drop-shadow(0 0 8px #fff9de)"
+              }}
+              className="inline-block"
+            >
+              Next Universe
+            </span>
+            . Together.
           </h1>
-          <p className="text-xl md:text-2xl text-[#5c4a1a] mb-8 font-mono typewriter">
+          <p className="text-xl md:text-2xl text-[#5c4a1a] mb-8">
             AI-assisted, community-voted, immutable lore on-chain.<br/>
-            Collaborative worldbuilding for the decentralized age.
+            <span className="text-[#5c4a1a]">Collaborative worldbuilding for the decentralized age.</span>
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/write" passHref legacyBehavior>
-              <Button className="bg-[#ffb300] text-[#3d2c00] px-8 py-6 text-lg font-semibold rounded-lg shadow hover:bg-[#ffd54f]">
-                Start Writing
-              </Button>
-            </Link>
+            <Button className="bg-[#ffb300] text-[#3d2c00] px-8 py-6 text-lg font-semibold rounded-lg shadow hover:bg-[#ffd54f]">
+              Start Writing
+            </Button>
             <Button className="bg-white border border-[#ffb300] text-[#a3a380] px-8 py-6 text-lg font-semibold rounded-lg shadow hover:bg-[#fff9de]">
               Explore Canon
             </Button>
@@ -71,7 +95,7 @@ export default function HomePage() {
                 <Pen className="h-10 w-10 text-blue-400" />
               </div>
               <h3 className="text-2xl font-semibold mb-4 text-slate-800">✍️ Write or Expand</h3>
-              <p className="text-slate-600 leading-relaxed font-mono">
+              <p className="text-slate-600 leading-relaxed">
                 Create new lore or expand existing entries with AI assistance. Tag your content as characters, places,
                 factions, events, or objects.
               </p>
@@ -81,7 +105,7 @@ export default function HomePage() {
                 <Vote className="h-10 w-10 text-green-400" />
               </div>
               <h3 className="text-2xl font-semibold mb-4 text-slate-800">✅ Community Vote</h3>
-              <p className="text-slate-600 leading-relaxed font-mono">
+              <p className="text-slate-600 leading-relaxed">
                 Submit your lore to the community for voting. Quality entries that enhance the universe get approved by
                 consensus.
               </p>
@@ -91,7 +115,7 @@ export default function HomePage() {
                 <Chain className="h-10 w-10 text-cyan-400" />
               </div>
               <h3 className="text-2xl font-semibold mb-4 text-slate-800">🪐 Canonized On-Chain</h3>
-              <p className="text-slate-600 leading-relaxed font-mono">
+              <p className="text-slate-600 leading-relaxed">
                 Approved lore becomes permanent canon, stored immutably on-chain via IPFS. Your contributions become
                 part of the eternal universe.
               </p>
@@ -112,49 +136,45 @@ export default function HomePage() {
             </Button>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {loading ? (
-              <div className="col-span-3 text-center text-[#a3a380]">Loading featured lore...</div>
-            ) : (
-              featuredEntries.map((entry) => (
-                <Card
-                  key={entry.id}
-                  className="bg-white border border-[#f5e6b2] hover:border-[#ffb300] transition-colors group"
-                >
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle className="text-[#3d2c00] group-hover:text-[#ffb300] transition-colors">
-                          {entry.title}
-                        </CardTitle>
-                        <div className="flex items-center gap-2 mt-2">
-                          <Badge variant="secondary" className="bg-[#fff9de] text-[#a3a380] border-[#f5e6b2]">
-                            {entry.category || entry.type}
+            {featuredEntries.map((entry) => (
+              <Card
+                key={entry.id}
+                className="bg-white border border-[#f5e6b2] hover:border-[#ffb300] transition-colors group"
+              >
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <CardTitle className="text-[#3d2c00] group-hover:text-[#ffb300] transition-colors">
+                        {entry.title}
+                      </CardTitle>
+                      <div className="flex items-center gap-2 mt-2">
+                        <Badge variant="secondary" className="bg-[#fff9de] text-[#a3a380] border-[#f5e6b2]">
+                          {entry.type}
+                        </Badge>
+                        {entry.isCanon ? (
+                          <Badge className="bg-[#fffbe9] text-[#388e3c] border-[#c8e6c9]">✅ Canon</Badge>
+                        ) : (
+                          <Badge variant="outline" className="border-[#ffe082] text-[#ffb300]">
+                            ⏳ Pending
                           </Badge>
-                          {entry.isMain ? (
-                            <Badge className="bg-[#fffbe9] text-[#388e3c] border-[#c8e6c9]">✅ Canon</Badge>
-                          ) : (
-                            <Badge variant="outline" className="border-[#ffe082] text-[#ffb300]">
-                              ⏳ Pending
-                            </Badge>
-                          )}
-                        </div>
+                        )}
                       </div>
                     </div>
-                  </CardHeader>
-                  <CardContent>
-                    <CardDescription className="text-[#5c4a1a] mb-4 line-clamp-3">{entry.excerpt || entry.content?.slice(0, 120) + (entry.content?.length > 120 ? "..." : "")}</CardDescription>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-[#a3a380]">by {entry.authorName || entry.author}</span>
-                      <Button asChild variant="ghost" size="sm" className="text-[#ffb300] hover:text-[#3d2c00]">
-                        <Link href={`/lore/${entry.id}`}>
-                          View {entry.isMain ? "Canon" : "Entry"} <ArrowRight className="ml-1 h-3 w-3" />
-                        </Link>
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            )}
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription className="text-[#5c4a1a] mb-4 line-clamp-3">{entry.excerpt}</CardDescription>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-[#a3a380]">by {entry.author}</span>
+                    <Button asChild variant="ghost" size="sm" className="text-[#ffb300] hover:text-[#3d2c00]">
+                      <Link href={`/lore/${entry.id}`}>
+                        View {entry.isCanon ? "Canon" : "Entry"} <ArrowRight className="ml-1 h-3 w-3" />
+                      </Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </section>
@@ -163,7 +183,7 @@ export default function HomePage() {
       <section className="py-24 bg-[#fff]">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-4xl font-bold mb-6 text-[#3d2c00]">Ready to Shape Reality?</h2>
-          <p className="text-xl text-[#5c4a1a] mb-8 max-w-2xl mx-auto font-mono">
+          <p className="text-xl text-[#5c4a1a] mb-8 max-w-2xl mx-auto">
             Join thousands of creators building the most ambitious collaborative universe ever conceived.
           </p>
           <Button

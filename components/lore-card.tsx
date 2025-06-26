@@ -25,6 +25,9 @@ interface LoreEntry {
 
 interface LoreCardProps {
   entry: LoreEntry
+  onVote?: (type: "up" | "down") => void
+  hasUpvoted?: boolean
+  hasDownvoted?: boolean
 }
 
 const USDC_ADDRESS = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48" // Ethereum mainnet USDC
@@ -32,7 +35,7 @@ const USDC_ABI = [
   "function transfer(address to, uint256 amount) public returns (bool)"
 ]
 
-export function LoreCard({ entry }: LoreCardProps) {
+export function LoreCard({ entry, onVote, hasUpvoted, hasDownvoted }: LoreCardProps) {
   const [tipAmount, setTipAmount] = useState(1)
   const [tipLoading, setTipLoading] = useState(false)
   const [tipSuccess, setTipSuccess] = useState(false)
@@ -133,12 +136,6 @@ export function LoreCard({ entry }: LoreCardProps) {
       </CardHeader>
 
       <CardContent className="flex-1 flex flex-col">
-        {entry.coverUrl && (
-          <div className="mb-3">
-            <img src={entry.coverUrl} alt={entry.title} className="w-full max-h-48 object-cover rounded border border-[#f5e6b2] mx-auto" />
-          </div>
-        )}
-        <pre className="text-xs text-gray-400 mb-2 overflow-x-auto">{JSON.stringify(entry, null, 2)}</pre>
         <CardDescription className="text-slate-300 mb-4 line-clamp-3 flex-1">{entry.excerpt}</CardDescription>
 
         <div className="space-y-3 mt-auto">
@@ -150,8 +147,22 @@ export function LoreCard({ entry }: LoreCardProps) {
           <div className="flex items-center justify-between gap-2">
             {!entry.isCanon && (
               <div className="flex gap-1">
-                <VoteButton type="up" count={Math.floor(entry.votes * 0.7)} compact />
-                <VoteButton type="down" count={Math.floor(entry.votes * 0.3)} compact />
+                <VoteButton
+                  type="up"
+                  count={entry.upvotes?.length || 0}
+                  compact
+                  onVote={() => onVote && onVote("up")}
+                  disabled={!!hasUpvoted || !!hasDownvoted}
+                  selected={!!hasUpvoted}
+                />
+                <VoteButton
+                  type="down"
+                  count={entry.downvotes?.length || 0}
+                  compact
+                  onVote={() => onVote && onVote("down")}
+                  disabled={!!hasUpvoted || !!hasDownvoted}
+                  selected={!!hasDownvoted}
+                />
               </div>
             )}
             <Button asChild variant="ghost" size="sm" className="text-purple-400 hover:text-purple-300 ml-auto">
