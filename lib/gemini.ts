@@ -1,23 +1,6 @@
 const GEMINI_API_URL =
   process.env.NEXT_PUBLIC_GEMINI_API || "https://lorechain.onrender.com/gemini"
 
-const transcriptPrompt = `
-I want you to act as a story narrator who converts YouTube videos into story-style summaries.
-
-Your task is to:
-1. Understand the key points in the transcript.
-2. Reconstruct it as an engaging narrative.
-3. Avoid dry summary. Write it like you're telling an interesting story to a friend.
-4. Keep it smooth and easy to follow.
-5. Output around 400–600 words.
-
-Transcript:
-"""
-{transcript}
-"""
-Now generate the story.
-`
-
 const textPrompt = `
 I want you to act as a creative storyteller who creates engaging stories from any topic or idea.
 
@@ -37,42 +20,6 @@ Now generate the story.
 
 async function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-export async function generateStoryFromTranscript(transcript: string): Promise<string> {
-  const cleanTranscript = transcript.replace(/\s+/g, " ").trim()
-  let attempts = 0;
-  let lastError: any = null;
-  while (attempts < 3) {
-    try {
-      const res = await fetch(GEMINI_API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          prompt: transcriptPrompt.replace("{transcript}", cleanTranscript),
-        }),
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        // Retry on 503 Service Unavailable
-        if (res.status === 503 || (typeof data.error === "string" && data.error.includes("503"))) {
-          attempts++;
-          await sleep(2000 * attempts); // Exponential backoff
-          continue;
-        }
-        console.error("Gemini API error:", data)
-        throw new Error(data.error || "Story generation failed.")
-      }
-      return data.response || "No story generated."
-    } catch (err) {
-      lastError = err;
-      attempts++;
-      await sleep(2000 * attempts);
-    }
-  }
-  throw new Error(lastError?.message || "Story generation failed after retries.");
 }
 
 export async function generateStoryFromText(text: string): Promise<string> {
