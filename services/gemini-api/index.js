@@ -36,6 +36,15 @@ app.post("/gemini", async (req, res) => {
   }
 })
 
+app.get("/gemini-models", async (req, res) => {
+  try {
+    const models = await genAI.listModels();
+    res.json(models);
+  } catch (err) {
+    res.status(500).json({ error: err.message, details: err });
+  }
+});
+
 app.listen(port, () => {
   console.log(`🚀 Gemini API listening on port ${port}`)
 })
