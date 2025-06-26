@@ -1,0 +1,91 @@
+@import url('https://fonts.cdnfonts.com/css/cabinet-grotesk');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'Cabinet Grotesk', system-ui, sans-serif;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@layer base {
+  :root {
+    --background: 255 100% 2%; /* deep black */
+    --foreground: 0 0% 100%; /* white */
+    --card: 255 20% 8%; /* dark gray */
+    --card-foreground: 0 0% 100%; /* white */
+    --primary: 265 80% 60%; /* vibrant purple */
+    --primary-foreground: 0 0% 100%; /* white */
+    --secondary: 255 20% 12%; /* slightly lighter dark */
+    --secondary-foreground: 0 0% 100%; /* white */
+    --muted: 265 20% 20%; /* muted purple */
+    --muted-foreground: 265 10% 80%; /* light purple */
+    --accent: 265 100% 70%; /* neon purple */
+    --accent-foreground: 0 0% 100%; /* white */
+    --destructive: 340 80% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 265 80% 40%; /* purple border */
+    --input: 255 20% 12%; /* dark input */
+    --ring: 265 100% 70%; /* neon purple ring */
+    --radius: 0.75rem;
+    --sidebar-background: 0 0% 0%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 262 83% 58%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 262 83% 58%;
+  }
+  .dark {
+    --background: 255 100% 2%;
+    --foreground: 0 0% 100%;
+    --card: 255 20% 8%;
+    --card-foreground: 0 0% 100%;
+    --primary: 265 80% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 255 20% 12%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 265 20% 20%;
+    --muted-foreground: 265 10% 80%;
+    --accent: 265 100% 70%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 340 80% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 265 80% 40%;
+    --input: 255 20% 12%;
+    --ring: 265 100% 70%;
+    --radius: 0.75rem;
+    --sidebar-background: 0 0% 0%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 262 83% 58%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 262 83% 58%;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-card bg-opacity-60 backdrop-blur-lg border border-border rounded-2xl shadow-xl;
+  }
+  .btn-modern {
+    @apply bg-gradient-to-r from-purple-700 via-purple-500 to-fuchsia-500 text-white rounded-xl shadow-lg px-6 py-2 font-semibold tracking-wide transition hover:from-fuchsia-500 hover:to-purple-700;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
