@@ -33,6 +33,27 @@ NEXT_PUBLIC_PLAYHT_API_KEY=your_api_key_here
 4. Restart your development server
 5. Click the "Speak" button on any AI suggestion to hear it read aloud
 
+## Firebase Setup
+
+To enable Google sign-in and Firestore:
+
+1. Create a Firebase project at https://console.firebase.google.com/
+2. Enable Google authentication in the Authentication > Sign-in method tab.
+3. Create a Firestore database in production or test mode.
+4. Get your Firebase config from Project Settings > General > Your apps.
+5. Add the following to your `.env.local` file:
+
+```env
+NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_auth_domain
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_storage_bucket
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
+NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
+```
+
+6. Restart your development server after adding the environment variables.
+
 ## Deployment
 
 Your project is live at:

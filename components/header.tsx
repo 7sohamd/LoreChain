@@ -1,18 +1,37 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Menu, User, LogOut } from "lucide-react"
-import { useAccount } from "wagmi"
-import { ConnectButton } from "@rainbow-me/rainbowkit"
-import { useDisconnect } from "wagmi"
+import { auth, provider } from "@/lib/firebase"
+import { signInWithPopup, signOut, onAuthStateChanged, User as FirebaseUser } from "firebase/auth"
 
 export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const { address, isConnected } = useAccount()
-  const { disconnect } = useDisconnect()
+  const [user, setUser] = useState<FirebaseUser | null>(null)
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, setUser)
+    return () => unsubscribe()
+  }, [])
+
+  const handleSignIn = async () => {
+    try {
+      await signInWithPopup(auth, provider)
+    } catch (err) {
+      alert("Failed to sign in with Google")
+    }
+  }
+
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth)
+    } catch (err) {
+      alert("Failed to sign out")
+    }
+  }
 
   const navigation = [
     { name: "Home", href: "/" },
@@ -46,59 +65,48 @@ export function Header() {
               ))}
             </nav>
 
-            {/* Wallet Connection */}
-            <div className="flex items-center space-x-4">
-              {isConnected ? (
-                <div className="hidden sm:flex items-center space-x-2">
-                  <span className="bg-green-600/20 text-green-400 border-green-500/50 px-2 py-1 rounded-full flex items-center">
-                    <div className="w-2 h-2 bg-green-400 rounded-full mr-2" />
-                    Wallet Connected
-                  </span>
-                  <span className="text-slate-300 font-mono text-sm">{address?.slice(0, 6)}...{address?.slice(-4)}</span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => disconnect()}
-                    className="text-slate-400 hover:text-white"
-                  >
+            {/* User Auth */}
+            <div className="hidden sm:flex items-center space-x-2">
+              {user ? (
+                <>
+                  <span className="text-slate-300 font-mono text-sm">{user.displayName || user.email}</span>
+                  <Button variant="ghost" size="sm" onClick={handleSignOut} className="text-slate-400 hover:text-white">
                     <LogOut className="h-4 w-4" />
                   </Button>
-                </div>
+                </>
               ) : (
-                <ConnectButton />
+                <Button variant="outline" size="sm" className="text-slate-400 hover:text-white" onClick={handleSignIn}>Sign In</Button>
               )}
-
-              {/* Mobile Menu */}
-              <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
-                <SheetTrigger asChild className="md:hidden">
-                  <Button variant="ghost" size="sm">
-                    <Menu className="h-5 w-5" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="right" className="bg-slate-900 border-slate-800">
-                  <div className="flex flex-col space-y-4 mt-8">
-                    {navigation.map((item) => (
-                      <Link
-                        key={item.name}
-                        href={item.href}
-                        className="text-slate-300 hover:text-white transition-colors text-lg"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        {item.name}
-                      </Link>
-                    ))}
-                    {isConnected && (
-                      <div className="pt-4 border-t border-slate-800">
-                        <div className="flex items-center space-x-2 mb-2">
-                          <User className="h-4 w-4 text-slate-400" />
-                          <span className="text-slate-300 font-mono text-sm">{address?.slice(0, 6)}...{address?.slice(-4)}</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </SheetContent>
-              </Sheet>
             </div>
+
+            {/* Mobile Menu */}
+            <Sheet>
+              <SheetTrigger asChild className="md:hidden">
+                <Button variant="ghost" size="sm">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="bg-slate-900 border-slate-800">
+                <div className="flex flex-col space-y-4 mt-8">
+                  {navigation.map((item) => (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className="text-slate-300 hover:text-white transition-colors text-lg"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      {item.name}
+                    </Link>
+                  ))}
+                  {/* User Auth for mobile */}
+                  {user ? (
+                    <Button variant="outline" size="sm" className="text-slate-400 hover:text-white mt-4" onClick={handleSignOut}>Sign Out</Button>
+                  ) : (
+                    <Button variant="outline" size="sm" className="text-slate-400 hover:text-white mt-4" onClick={handleSignIn}>Sign In</Button>
+                  )}
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </header>

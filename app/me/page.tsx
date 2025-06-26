@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -8,76 +8,37 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { User, Trophy, Scroll, LogOut, ExternalLink } from "lucide-react"
 import Link from "next/link"
 import { CanonStatusBadge } from "@/components/canon-status-badge"
-
-const mockUserData = {
-  address: "0x742d35Bc8f3a91De1c7b44Af",
-  joinDate: "2024-01-10",
-  totalSubmissions: 12,
-  canonEntries: 5,
-  totalVotes: 847,
-  reputation: 1250,
-}
-
-const mockSubmissions = [
-  {
-    id: "1",
-    title: "The Nexus Convergence",
-    type: "Event",
-    isCanon: true,
-    votes: 127,
-    createdAt: "2024-01-15",
-    canonizedAt: "2024-01-22",
-  },
-  {
-    id: "2",
-    title: "The Quantum Gardens",
-    type: "Place",
-    isCanon: true,
-    votes: 89,
-    createdAt: "2024-01-20",
-    canonizedAt: "2024-01-28",
-  },
-  {
-    id: "3",
-    title: "Captain Zara Nightfall",
-    type: "Character",
-    isCanon: false,
-    votes: 34,
-    createdAt: "2024-02-01",
-  },
-  {
-    id: "4",
-    title: "The Memory Thieves Guild",
-    type: "Faction",
-    isCanon: true,
-    votes: 156,
-    createdAt: "2024-02-05",
-    canonizedAt: "2024-02-12",
-  },
-  {
-    id: "5",
-    title: "The Singing Crystals",
-    type: "Object",
-    isCanon: false,
-    votes: 67,
-    createdAt: "2024-02-10",
-  },
-]
+import { auth, db } from "@/lib/firebase"
+import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth"
+import { collection, query, where, getDocs } from "firebase/firestore"
 
 export default function MyLorePage() {
-  const [activeTab, setActiveTab] = useState("all")
+  const [user, setUser] = useState<FirebaseUser | null>(null)
+  const [myStories, setMyStories] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
 
-  const filteredSubmissions = mockSubmissions.filter((submission) => {
-    if (activeTab === "all") return true
-    if (activeTab === "canon") return submission.isCanon
-    if (activeTab === "pending") return !submission.isCanon
-    return true
-  })
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, setUser)
+    return () => unsubscribe()
+  }, [])
 
-  const handleLogout = () => {
-    // Handle logout logic
-    console.log("Logging out...")
-  }
+  useEffect(() => {
+    if (!user) {
+      setMyStories([])
+      setLoading(false)
+      return
+    }
+    const fetchMyStories = async () => {
+      const q = query(collection(db, "stories"), where("authorId", "==", user.uid))
+      const querySnapshot = await getDocs(q)
+      setMyStories(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })))
+      setLoading(false)
+    }
+    fetchMyStories()
+  }, [user])
+
+  if (loading) return <div className="text-center py-12 text-slate-300">Loading...</div>
+  if (!user) return <div className="text-center py-12 text-slate-300">Please sign in to view your stories.</div>
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 py-8">
@@ -101,21 +62,20 @@ export default function MyLorePage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <p className="text-sm text-slate-400">Wallet Address</p>
-                  <p className="text-white font-mono text-sm break-all">{mockUserData.address}</p>
+                  <p className="text-sm text-slate-400">Email</p>
+                  <p className="text-white font-mono text-sm break-all">user@email.com</p>
                 </div>
                 <div>
                   <p className="text-sm text-slate-400">Member Since</p>
-                  <p className="text-white">{new Date(mockUserData.joinDate).toLocaleDateString()}</p>
+                  <p className="text-white">2024-01-01</p>
                 </div>
                 <Button
-                  onClick={handleLogout}
                   variant="outline"
                   size="sm"
                   className="w-full border-red-500/50 text-red-400 hover:bg-red-500/10"
                 >
                   <LogOut className="mr-2 h-4 w-4" />
-                  Disconnect
+                  Sign Out
                 </Button>
               </CardContent>
             </Card>
@@ -131,19 +91,7 @@ export default function MyLorePage() {
               <CardContent className="space-y-4">
                 <div className="flex justify-between">
                   <span className="text-slate-400">Total Submissions</span>
-                  <span className="text-white font-semibold">{mockUserData.totalSubmissions}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Canon Entries</span>
-                  <span className="text-green-400 font-semibold">{mockUserData.canonEntries}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Total Votes</span>
-                  <span className="text-purple-400 font-semibold">{mockUserData.totalVotes}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Reputation</span>
-                  <span className="text-yellow-400 font-semibold">{mockUserData.reputation}</span>
+                  <span className="text-white font-semibold">{myStories.length}</span>
                 </div>
               </CardContent>
             </Card>
@@ -177,79 +125,21 @@ export default function MyLorePage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                  <TabsList className="bg-slate-700 mb-6">
-                    <TabsTrigger value="all" className="data-[state=active]:bg-purple-600">
-                      All ({mockSubmissions.length})
-                    </TabsTrigger>
-                    <TabsTrigger value="canon" className="data-[state=active]:bg-green-600">
-                      Canon ({mockSubmissions.filter((s) => s.isCanon).length})
-                    </TabsTrigger>
-                    <TabsTrigger value="pending" className="data-[state=active]:bg-yellow-600">
-                      Pending ({mockSubmissions.filter((s) => !s.isCanon).length})
-                    </TabsTrigger>
-                  </TabsList>
-
-                  <div className="space-y-4">
-                    {filteredSubmissions.map((submission) => (
-                      <Card
-                        key={submission.id}
-                        className="bg-slate-700/50 border-slate-600 hover:border-purple-500/50 transition-colors"
-                      >
-                        <CardContent className="p-4">
-                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                            <div className="space-y-2">
-                              <div className="flex items-center gap-2">
-                                <h3 className="text-white font-semibold">{submission.title}</h3>
-                                <Badge variant="secondary" className="bg-slate-600 text-slate-300">
-                                  {submission.type}
-                                </Badge>
-                                <CanonStatusBadge isCanon={submission.isCanon} />
-                              </div>
-                              <div className="flex items-center gap-4 text-sm text-slate-400">
-                                <span>Created: {new Date(submission.createdAt).toLocaleDateString()}</span>
-                                {submission.canonizedAt && (
-                                  <span className="text-green-400">
-                                    Canonized: {new Date(submission.canonizedAt).toLocaleDateString()}
-                                  </span>
-                                )}
-                                <span>{submission.votes} votes</span>
-                              </div>
-                            </div>
-                            <div className="flex gap-2">
-                              <Button
-                                asChild
-                                variant="outline"
-                                size="sm"
-                                className="border-slate-600 text-slate-300 hover:bg-slate-600"
-                              >
-                                <Link href={`/lore/${submission.id}`}>View Entry</Link>
-                              </Button>
-                              {submission.isCanon && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="border-green-500/50 text-green-400 hover:bg-green-500/10"
-                                >
-                                  <ExternalLink className="h-4 w-4" />
-                                </Button>
-                              )}
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
+                {myStories.length === 0 ? (
+                  <div className="text-slate-400">You haven't submitted any stories yet.</div>
+                ) : (
+                  <div className="space-y-6">
+                    {myStories.map((story) => (
+                      <div key={story.id} className="bg-slate-800/50 border-slate-700 rounded-lg p-6">
+                        <h2 className="text-xl font-bold text-white mb-2">{story.title}</h2>
+                        <div className="text-slate-300 mb-2">{story.category}</div>
+                        <div className="text-slate-200 whitespace-pre-line mb-2">{story.content}</div>
+                        <div className="text-sm text-slate-400">Upvotes: {story.upvotes?.length || 0} | Downvotes: {story.downvotes?.length || 0}</div>
+                        {story.isMain && <div className="text-green-400 font-bold mt-2">MAIN STORY</div>}
+                      </div>
                     ))}
                   </div>
-
-                  {filteredSubmissions.length === 0 && (
-                    <div className="text-center py-8">
-                      <p className="text-slate-400 mb-4">No submissions found in this category.</p>
-                      <Button asChild className="bg-purple-600 hover:bg-purple-700">
-                        <Link href="/write">Create Your First Lore Entry</Link>
-                      </Button>
-                    </div>
-                  )}
-                </Tabs>
+                )}
               </CardContent>
             </Card>
           </div>
