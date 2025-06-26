@@ -10,20 +10,11 @@ interface VoteButtonProps {
   count: number
   compact?: boolean
   onVote?: (type: "up" | "down") => void
+  disabled?: boolean
+  selected?: boolean
 }
 
-export function VoteButton({ type, count, compact = false, onVote }: VoteButtonProps) {
-  const [hasVoted, setHasVoted] = useState(false)
-  const [currentCount, setCurrentCount] = useState(count)
-
-  const handleVote = () => {
-    if (hasVoted) return
-
-    setHasVoted(true)
-    setCurrentCount((prev) => prev + 1)
-    onVote?.(type)
-  }
-
+export function VoteButton({ type, count, compact = false, onVote, disabled = false, selected = false }: VoteButtonProps) {
   const Icon = type === "up" ? ThumbsUp : ThumbsDown
   const colorClass =
     type === "up"
@@ -34,18 +25,18 @@ export function VoteButton({ type, count, compact = false, onVote }: VoteButtonP
     <Button
       variant="outline"
       size={compact ? "sm" : "default"}
-      onClick={handleVote}
-      disabled={hasVoted}
+      onClick={() => onVote?.(type)}
+      disabled={disabled}
       className={cn(
         "bg-transparent",
         colorClass,
-        hasVoted && "opacity-50 cursor-not-allowed",
+        selected && "ring-2 ring-purple-500",
         compact && "px-2 py-1 h-auto text-xs",
       )}
     >
       <Icon className={cn("h-4 w-4", !compact && "mr-2")} />
       {!compact && (type === "up" ? "Upvote" : "Downvote")}
-      <span className={cn(compact ? "ml-1" : "ml-2", "font-semibold")}>{currentCount}</span>
+      <span className={cn(compact ? "ml-1" : "ml-2", "font-semibold")}>{count}</span>
     </Button>
   )
 }
