@@ -1,41 +1,31 @@
+"use client";
+
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Pen, Globe, ArrowRight, Sparkles, Vote, CircleIcon as Chain } from "lucide-react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
-
-const featuredEntries = [
-  {
-    id: "1",
-    title: "The Nexus Convergence",
-    excerpt:
-      "A mysterious event where multiple realities began to bleed into one another, creating pockets of impossible physics and merged timelines...",
-    author: "0x742d...35Bc",
-    type: "Event",
-    isCanon: true,
-  },
-  {
-    id: "2",
-    title: "House Voidwhisper",
-    excerpt:
-      "An ancient faction that claims to hear the voices of the void between stars, using this knowledge to manipulate quantum probabilities...",
-    author: "0x8f3a...91De",
-    type: "Faction",
-    isCanon: true,
-  },
-  {
-    id: "3",
-    title: "The Ethereal Codex",
-    excerpt:
-      "A living document that rewrites itself based on the collective unconscious of nearby sentient beings, containing prophecies that change...",
-    author: "0x1c7b...44Af",
-    type: "Object",
-    isCanon: false,
-  },
-]
+import { useEffect, useState } from "react"
+import { collection, getDocs } from "firebase/firestore"
+import { db } from "@/lib/firebase"
 
 export default function HomePage() {
+  const [featuredEntries, setFeaturedEntries] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function fetchFeatured() {
+      const querySnapshot = await getDocs(collection(db, "stories"))
+      const allEntries = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+      // Randomly pick 3
+      const shuffled = allEntries.sort(() => 0.5 - Math.random())
+      setFeaturedEntries(shuffled.slice(0, 3))
+      setLoading(false)
+    }
+    fetchFeatured()
+  }, [])
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#fff9de] via-[#fff] to-[#fff9de] relative overflow-hidden">
       {/* Hero Section */}
@@ -122,45 +112,49 @@ export default function HomePage() {
             </Button>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featuredEntries.map((entry) => (
-              <Card
-                key={entry.id}
-                className="bg-white border border-[#f5e6b2] hover:border-[#ffb300] transition-colors group"
-              >
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle className="text-[#3d2c00] group-hover:text-[#ffb300] transition-colors">
-                        {entry.title}
-                      </CardTitle>
-                      <div className="flex items-center gap-2 mt-2">
-                        <Badge variant="secondary" className="bg-[#fff9de] text-[#a3a380] border-[#f5e6b2]">
-                          {entry.type}
-                        </Badge>
-                        {entry.isCanon ? (
-                          <Badge className="bg-[#fffbe9] text-[#388e3c] border-[#c8e6c9]">✅ Canon</Badge>
-                        ) : (
-                          <Badge variant="outline" className="border-[#ffe082] text-[#ffb300]">
-                            ⏳ Pending
+            {loading ? (
+              <div className="col-span-3 text-center text-[#a3a380]">Loading featured lore...</div>
+            ) : (
+              featuredEntries.map((entry) => (
+                <Card
+                  key={entry.id}
+                  className="bg-white border border-[#f5e6b2] hover:border-[#ffb300] transition-colors group"
+                >
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <CardTitle className="text-[#3d2c00] group-hover:text-[#ffb300] transition-colors">
+                          {entry.title}
+                        </CardTitle>
+                        <div className="flex items-center gap-2 mt-2">
+                          <Badge variant="secondary" className="bg-[#fff9de] text-[#a3a380] border-[#f5e6b2]">
+                            {entry.category || entry.type}
                           </Badge>
-                        )}
+                          {entry.isMain ? (
+                            <Badge className="bg-[#fffbe9] text-[#388e3c] border-[#c8e6c9]">✅ Canon</Badge>
+                          ) : (
+                            <Badge variant="outline" className="border-[#ffe082] text-[#ffb300]">
+                              ⏳ Pending
+                            </Badge>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-[#5c4a1a] mb-4 line-clamp-3">{entry.excerpt}</CardDescription>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-[#a3a380]">by {entry.author}</span>
-                    <Button asChild variant="ghost" size="sm" className="text-[#ffb300] hover:text-[#3d2c00]">
-                      <Link href={`/lore/${entry.id}`}>
-                        View {entry.isCanon ? "Canon" : "Entry"} <ArrowRight className="ml-1 h-3 w-3" />
-                      </Link>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardHeader>
+                  <CardContent>
+                    <CardDescription className="text-[#5c4a1a] mb-4 line-clamp-3">{entry.excerpt || entry.content?.slice(0, 120) + (entry.content?.length > 120 ? "..." : "")}</CardDescription>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-[#a3a380]">by {entry.authorName || entry.author}</span>
+                      <Button asChild variant="ghost" size="sm" className="text-[#ffb300] hover:text-[#3d2c00]">
+                        <Link href={`/lore/${entry.id}`}>
+                          View {entry.isMain ? "Canon" : "Entry"} <ArrowRight className="ml-1 h-3 w-3" />
+                        </Link>
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
           </div>
         </div>
       </section>
