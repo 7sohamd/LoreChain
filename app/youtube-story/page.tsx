@@ -14,16 +14,22 @@ export default function YouTubeStoryPage() {
     setStory("")
     setError("")
 
-    const res = await fetch("/youtube-story/api", {
-      method: "POST",
-      body: JSON.stringify({ url }),
-    })
+    try {
+      const res = await fetch("/api/youtube-story", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      })
 
-    const data = await res.json()
-    if (res.ok) {
-      setStory(data.story)
-    } else {
-      setError(data.error || "Something went wrong")
+      const data = await res.json()
+
+      if (res.ok) {
+        setStory(data.story)
+      } else {
+        setError(data.error || "Something went wrong.")
+      }
+    } catch {
+      setError("Network error. Please try again.")
     }
 
     setLoading(false)
@@ -34,7 +40,7 @@ export default function YouTubeStoryPage() {
       <h1 className="text-2xl font-bold mb-4">🎬 YouTube Story Mode</h1>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <input
-          type="text"
+          type="url"
           placeholder="Paste YouTube video link..."
           className="border p-2 rounded"
           value={url}
@@ -51,6 +57,7 @@ export default function YouTubeStoryPage() {
       </form>
 
       {error && <p className="text-red-500 mt-4">{error}</p>}
+
       {story && (
         <div className="mt-6 bg-gray-50 p-4 rounded shadow whitespace-pre-line">
           {story}
