@@ -32,7 +32,7 @@ app.post("/gemini", async (req, res) => {
     res.json({ response })
   } catch (err) {
     console.error("Gemini error:", err)
-    res.status(500).json({ error: "Gemini API failed" })
+    res.status(500).json({ error: err.message || "Gemini API failed", details: err })
   }
 })
 
