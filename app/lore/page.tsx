@@ -9,12 +9,31 @@ import { Search, Filter } from "lucide-react"
 import { LoreCard } from "@/components/lore-card"
 import { auth, db } from "@/lib/firebase"
 import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth"
-import { collection, getDocs, updateDoc, doc, query, where, getDoc } from "firebase/firestore"
+import { collection, getDocs, updateDoc, doc, query, where, getDoc, setDoc } from "firebase/firestore"
 
 export default function LorePage() {
   const [stories, setStories] = useState<any[]>([])
   const [user, setUser] = useState<FirebaseUser | null>(null)
   const [loading, setLoading] = useState(true)
+  const [userPreference, setUserPreference] = useState<string | null>(null)
+  const [showOnboarding, setShowOnboarding] = useState(false)
+  const [savingPref, setSavingPref] = useState(false)
+  useEffect(() => {
+    const checkPreference = async () => {
+      let pref = null
+      if (user) {
+        const userDoc = await getDoc(doc(db, "users", user.uid))
+        if (userDoc.exists()) {
+          pref = userDoc.data().lorePreference || null
+        }
+      } else {
+        pref = localStorage.getItem("lorePreference")
+      }
+      setUserPreference(pref)
+      setShowOnboarding(!pref)
+    }
+    checkPreference()
+  }, [user])
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, setUser)
@@ -49,26 +68,62 @@ export default function LorePage() {
     if (type === "up") upvotes.push(user.uid)
     else downvotes.push(user.uid)
     await updateDoc(storyRef, { upvotes, downvotes })
-    // If upvotes >= 1 and not main, mark as main and set parentMainId
     if (upvotes.length >= 1 && !story.isMain) {
-      // Find current main story
       const mainQ = query(collection(db, "stories"), where("isMain", "==", true))
       const mainSnap = await getDocs(mainQ)
       let parentMainId = null
       if (!mainSnap.empty) parentMainId = mainSnap.docs[0].id
       await updateDoc(storyRef, { isMain: true, parentMainId })
-      // Optionally, set previous main's isMain to false if you want only one main
       if (!mainSnap.empty) {
         await updateDoc(doc(db, "stories", mainSnap.docs[0].id), { isMain: false })
       }
     }
-    // Refresh stories
     const q = query(collection(db, "stories"))
     const querySnapshot = await getDocs(q)
     setStories(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })))
   }
 
+  const handlePreferenceSubmit = async (pref: string) => {
+    setSavingPref(true)
+    if (user) {
+      await setDoc(doc(db, "users", user.uid), { lorePreference: pref }, { merge: true })
+    } else {
+      localStorage.setItem("lorePreference", pref)
+    }
+    setUserPreference(pref)
+    setShowOnboarding(false)
+    setSavingPref(false)
+  }
+
   if (loading) return <div className="text-center py-12 text-slate-300">Loading...</div>
+
+  if (showOnboarding) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-80 z-50">
+        <div className="bg-white rounded-lg p-8 max-w-md w-full text-center">
+          <h2 className="text-2xl font-bold mb-4 text-black">Welcome to LoreChain!</h2>
+          <p className="mb-6 text-black">What kind of lore are you most interested in?</p>
+          <div className="flex flex-col gap-3 mb-6">
+            {["character", "place", "faction", "event", "object", "all"].map(type => (
+              <button
+                key={type}
+                className="py-2 px-4 rounded bg-purple-600 text-white hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                onClick={() => handlePreferenceSubmit(type)}
+                disabled={savingPref}
+              >
+                {type.charAt(0).toUpperCase() + type.slice(1)}
+              </button>
+            ))}
+          </div>
+          {savingPref && <div className="text-slate-500">Saving your preference...</div>}
+        </div>
+      </div>
+    )
+  }
+
+  const filteredStories = userPreference && userPreference !== "all"
+    ? stories.filter(entry => !entry.parentMainId && entry.category === userPreference)
+    : stories.filter(entry => !entry.parentMainId)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 py-8">
@@ -80,7 +135,6 @@ export default function LorePage() {
           <p className="text-slate-300 text-lg">Explore the ever-growing universe of collaborative storytelling</p>
         </div>
 
-        {/* Filters */}
         <div className="mb-8 space-y-4">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
@@ -111,21 +165,20 @@ export default function LorePage() {
           <Tabs className="w-full">
             <TabsList className="bg-slate-800 border-slate-700">
               <TabsTrigger value="all" className="data-[state=active]:bg-purple-600">
-                All ({stories.length})
+                All ({filteredStories.length})
               </TabsTrigger>
               <TabsTrigger value="canon" className="data-[state=active]:bg-green-600">
-                Canon ({stories.filter((e) => e.isMain).length})
+                Canon ({filteredStories.filter((e) => e.isMain).length})
               </TabsTrigger>
               <TabsTrigger value="pending" className="data-[state=active]:bg-yellow-600">
-                Pending ({stories.filter((e) => !e.isMain).length})
+                Pending ({filteredStories.filter((e) => !e.isMain).length})
               </TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
 
-        {/* Lore Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {stories.map((entry) => (
+          {filteredStories.map((entry) => (
             <div key={entry.id} className="flex flex-col gap-2">
               <LoreCard
                 entry={{
@@ -164,7 +217,7 @@ export default function LorePage() {
           ))}
         </div>
 
-        {stories.length === 0 && (
+        {filteredStories.length === 0 && (
           <div className="text-center py-12">
             <p className="text-slate-400 text-lg">No lore entries yet.</p>
             <Button asChild className="mt-4 bg-purple-600 hover:bg-purple-700">
