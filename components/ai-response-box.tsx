@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Sparkles, Copy, Plus, Volume2, VolumeX } from "lucide-react"
 import { useState } from "react"
-import { ttsService } from "@/lib/tts-service"
 
 interface AIResponseBoxProps {
   suggestions: string[]
@@ -27,22 +26,16 @@ export function AIResponseBox({ suggestions, isLoading, onSelectSuggestion }: AI
     try {
       if (isSpeaking && speakingIndex === index) {
         // Stop speaking if already speaking this text
-        ttsService.stop()
-        setIsSpeaking(false)
-        setSpeakingIndex(null)
         return
       }
 
       // Stop any current speech
-      ttsService.stop()
       setIsSpeaking(false)
       setSpeakingIndex(null)
 
       // Start speaking the new text
       setIsSpeaking(true)
       setSpeakingIndex(index)
-      
-      await ttsService.speak(text)
       
       // Reset state when speech ends
       setIsSpeaking(false)

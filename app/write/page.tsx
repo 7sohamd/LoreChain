@@ -1,26 +1,36 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
-import { Sparkles, Send, Lightbulb, Wallet } from "lucide-react"
-import { ConnectWalletModal } from "@/components/connect-wallet-modal"
+import { Sparkles, Send, Lightbulb } from "lucide-react"
 import { AIResponseBox } from "@/components/ai-response-box"
+import { auth, db } from "@/lib/firebase"
+import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth"
+import { collection, addDoc, Timestamp } from "firebase/firestore"
 
 export default function WritePage() {
   const [title, setTitle] = useState("")
   const [content, setContent] = useState("")
   const [category, setCategory] = useState("")
-  const [isConnected, setIsConnected] = useState(false)
-  const [showWalletModal, setShowWalletModal] = useState(false)
+  const [user, setUser] = useState<FirebaseUser | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [showAISuggestions, setShowAISuggestions] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
   const [aiSuggestions, setAISuggestions] = useState<string[]>([])
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      setUser(firebaseUser)
+      setLoading(false)
+    })
+    return () => unsubscribe()
+  }, [])
 
   const handleGetAISuggestions = async () => {
     setIsGenerating(true)
@@ -39,13 +49,44 @@ export default function WritePage() {
     setIsGenerating(false)
   }
 
-  const handleSubmit = () => {
-    if (!isConnected) {
-      setShowWalletModal(true)
+  const handleSubmit = async () => {
+    if (!user) {
+      alert("Please sign in to submit lore.")
       return
     }
-    // Handle submission logic
-    console.log("Submitting lore:", { title, content, category })
+    setIsSubmitting(true)
+    try {
+      await addDoc(collection(db, "stories"), {
+        title,
+        content,
+        category,
+        authorId: user.uid,
+        authorName: user.displayName || user.email,
+        createdAt: Timestamp.now(),
+        upvotes: [],
+        downvotes: [],
+        isMain: false,
+        parentMainId: null,
+      })
+      alert("Story submitted successfully!")
+      // Clear the form
+      setTitle("")
+      setContent("")
+      setCategory("")
+    } catch (err) {
+      console.error(err)
+      alert("Failed to submit story.")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  if (loading) {
+    return <div className="text-center py-12 text-slate-300">Loading...</div>
+  }
+
+  if (!user) {
+    return <div className="text-center py-12 text-slate-300">Please sign in to write your story.</div>
   }
 
   return (
@@ -130,10 +171,10 @@ export default function WritePage() {
                   <Button
                     onClick={handleSubmit}
                     className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
-                    disabled={!title || !content || !category}
+                    disabled={!title || !content || !category || isSubmitting}
                   >
                     <Send className="mr-2 h-4 w-4" />
-                    Submit for Voting
+                    {isSubmitting ? "Submitting..." : "Submit for Voting"}
                   </Button>
                 </div>
               </CardContent>
@@ -141,38 +182,6 @@ export default function WritePage() {
           </div>
 
           <div className="space-y-6">
-            {/* Wallet Status */}
-            <Card className="bg-slate-800/50 border-slate-700">
-              <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
-                  <Wallet className="h-5 w-5" />
-                  Wallet Status
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {isConnected ? (
-                  <div className="space-y-2">
-                    <Badge className="bg-green-600/20 text-green-400 border-green-500/50">✅ Connected</Badge>
-                    <p className="text-sm text-slate-300">0x742d...35Bc</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    <Badge variant="outline" className="border-yellow-500/50 text-yellow-400">
-                      ⚠️ Not Connected
-                    </Badge>
-                    <p className="text-sm text-slate-300">Connect your wallet to submit lore</p>
-                    <Button
-                      onClick={() => setShowWalletModal(true)}
-                      size="sm"
-                      className="w-full bg-purple-600 hover:bg-purple-700"
-                    >
-                      Connect Wallet
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
             {/* Writing Tips */}
             <Card className="bg-slate-800/50 border-slate-700">
               <CardHeader>
@@ -202,11 +211,6 @@ export default function WritePage() {
             />
           </div>
         )}
-
-        <ConnectWalletModal
-          isOpen={showWalletModal}
-          onClose={() => setShowWalletModal(false)}
-        />
       </div>
     </div>
   )
