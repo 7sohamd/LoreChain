@@ -23,7 +23,7 @@ app.post("/gemini", async (req, res) => {
 
     if (!prompt) return res.status(400).json({ error: "Prompt required" })
 
-    const model = genAI.getGenerativeModel({ model: "models/gemini-pro" })
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" })
 
     const result = await model.generateContent(prompt)
 
