@@ -11,6 +11,55 @@ import { collection, addDoc, serverTimestamp, getDocs, orderBy, query, where } f
 import { signInWithPopup, onAuthStateChanged } from "firebase/auth";
 import { getSpeechFromText } from "@/lib/tts-service";
 
+const HOST_VOICES = {
+  "Host 1": "21m00Tcm4TlvDq8ikWAM", // Adam
+  "Host 2": "JBFqnCBsd6RMkjVDRZzb", // Rachel
+};
+
+function pickBackgroundMusic(text: string) {
+  const lower = text.toLowerCase();
+  if (lower.includes("happy") || lower.includes("joy") || lower.includes("excited")) return "uplifting";
+  if (lower.includes("sad") || lower.includes("cry") || lower.includes("loss")) return "sad";
+  if (lower.includes("mystery") || lower.includes("secret") || lower.includes("unknown")) return "mystery";
+  if (lower.includes("love") || lower.includes("romance") || lower.includes("heart")) return "romantic";
+  if (lower.includes("adventure") || lower.includes("quest") || lower.includes("explore")) return "adventure";
+  if (lower.includes("tense") || lower.includes("danger") || lower.includes("chase")) return "tension";
+  if (lower.includes("relax") || lower.includes("calm") || lower.includes("peace")) return "relaxing";
+  if (lower.includes("epic") || lower.includes("battle") || lower.includes("hero")) return "cinematic";
+  return "cinematic";
+}
+
+function parsePodcastSegments(podcast: string): { speaker: 'Host 1' | 'Host 2', text: string }[] {
+  // Returns [{ speaker: "Host 1", text: "..." }, ...]
+  return podcast.split(/\n/).map(line => {
+    const match = line.match(/^(Host 1|Host 2)(?:\s*\(.*\))?:\s*(.*)$/);
+    if (match) return { speaker: match[1] as 'Host 1' | 'Host 2', text: match[2] };
+    return { speaker: 'Host 1', text: line }; // fallback
+  });
+}
+
+function stripMarkdown(text: string) {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '$1') // bold
+    .replace(/\*(.*?)\*/g, '$1')       // italics
+    .replace(/\_(.*?)\_/g, '$1')       // underscore italics
+    .replace(/\`(.*?)\`/g, '$1')       // inline code
+    .replace(/^#+\s+(.*)/gm, '$1')      // headings
+    .replace(/\[(.*?)\]\(.*?\)/g, '$1') // links
+    .replace(/\!\[(.*?)\]\(.*?\)/g, '') // images
+    .replace(/\>\s?(.*)/g, '$1')       // blockquotes
+    .replace(/\r?\n/g, '\n')          // normalize newlines
+    .replace(/\n{2,}/g, '\n');         // collapse multiple newlines
+}
+
+function ensureStartsWithHost(text: string) {
+  const lines = text.split(/\n/).map(line => line.trim()).filter(Boolean);
+  const firstHostIdx = lines.findIndex(line => /^Host [12](\s*\(.*\))?:/.test(line));
+  if (firstHostIdx === 0) return lines.join('\n');
+  const hostLines = lines.slice(firstHostIdx);
+  return hostLines.join('\n');
+}
+
 export default function PodcastPage() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -24,6 +73,10 @@ export default function PodcastPage() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [showFullPodcast, setShowFullPodcast] = useState(false);
   const [expandedPastChats, setExpandedPastChats] = useState<{ [id: string]: boolean }>({});
+  const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
+  const [currentSegmentIndex, setCurrentSegmentIndex] = useState<number>(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const [isStopped, setIsStopped] = useState(false);
 
   // Auth state
   useEffect(() => {
@@ -99,60 +152,6 @@ export default function PodcastPage() {
     }
   }
 
-  function pickBackgroundMusic(text: string) {
-    const lower = text.toLowerCase();
-    if (lower.includes("happy") || lower.includes("joy") || lower.includes("excited")) return "uplifting";
-    if (lower.includes("sad") || lower.includes("cry") || lower.includes("loss")) return "sad";
-    if (lower.includes("mystery") || lower.includes("secret") || lower.includes("unknown")) return "mystery";
-    if (lower.includes("love") || lower.includes("romance") || lower.includes("heart")) return "romantic";
-    if (lower.includes("adventure") || lower.includes("quest") || lower.includes("explore")) return "adventure";
-    if (lower.includes("tense") || lower.includes("danger") || lower.includes("chase")) return "tension";
-    if (lower.includes("relax") || lower.includes("calm") || lower.includes("peace")) return "relaxing";
-    if (lower.includes("epic") || lower.includes("battle") || lower.includes("hero")) return "cinematic";
-    return "cinematic";
-  }
-
-  async function handleSpeak() {
-    if (speaking && audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-      audioRef.current = null;
-      setSpeaking(false);
-      setIsLoadingAudio(false);
-      return;
-    }
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-      audioRef.current = null;
-    }
-    setIsLoadingAudio(true);
-    setSpeaking(true);
-    try {
-      const backgroundMusic = pickBackgroundMusic(podcast);
-      const audioBlob = await getSpeechFromText(podcast, "21m00Tcm4TlvDq8ikWAM", backgroundMusic);
-      if (!audioBlob) throw new Error('No audio received');
-      const audioUrl = URL.createObjectURL(audioBlob);
-      const audio = new Audio(audioUrl);
-      audioRef.current = audio;
-      audio.onended = () => {
-        URL.revokeObjectURL(audioUrl);
-        audioRef.current = null;
-        setSpeaking(false);
-        setIsLoadingAudio(false);
-      };
-      audio.onpause = () => {
-        setIsLoadingAudio(false);
-      };
-      await audio.play();
-      setIsLoadingAudio(false);
-    } catch (error) {
-      setSpeaking(false);
-      setIsLoadingAudio(false);
-      alert('TTS failed: ' + (error as Error).message);
-    }
-  }
-
   // Helper to get preview text (first 500 chars or 10 lines)
   function getPreview(text: string) {
     const lines = text.split("\n");
@@ -163,6 +162,104 @@ export default function PodcastPage() {
       return text.slice(0, 500) + "...";
     }
     return text;
+  }
+
+  async function playPodcastWithVoicesElevenLabs(podcast: string, resumeFromIndex = 0) {
+    const processedPodcast = ensureStartsWithHost(stripMarkdown(podcast));
+    const segments = parsePodcastSegments(processedPodcast);
+    setIsLoadingAudio(true);
+    setSpeaking(true);
+    setIsStopped(false);
+    for (let i = resumeFromIndex; i < segments.length; i++) {
+      setCurrentSegmentIndex(i);
+      if (isStopped) break;
+      if (!segments[i].text.trim()) continue;
+      const voiceId = HOST_VOICES[segments[i].speaker] || HOST_VOICES["Host 1"];
+      const backgroundMusic = pickBackgroundMusic(segments[i].text);
+      const cleanText = stripMarkdown(segments[i].text);
+      const audioBlob = await getSpeechFromText(cleanText, voiceId, backgroundMusic);
+      if (!audioBlob) continue;
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audio = new Audio(audioUrl);
+      setCurrentAudio(audio);
+      await new Promise<void>(resolve => {
+        audio.onended = () => {
+          URL.revokeObjectURL(audioUrl);
+          setCurrentAudio(null);
+          if (!isPaused && !isStopped) resolve();
+        };
+        audio.onerror = () => {
+          setCurrentAudio(null);
+          resolve();
+        };
+        audio.onpause = () => {
+          if (isPaused) {
+            setCurrentAudio(audio);
+          }
+        };
+        audio.play();
+      });
+      if (isPaused || isStopped) break;
+    }
+    setSpeaking(false);
+    setIsLoadingAudio(false);
+    setCurrentAudio(null);
+    setCurrentSegmentIndex(0);
+    setIsPaused(false);
+    setIsStopped(false);
+  }
+
+  async function handleSpeak() {
+    if (speaking && currentAudio) {
+      currentAudio.pause();
+      setIsPaused(true);
+      setSpeaking(false);
+      setIsLoadingAudio(false);
+      return;
+    }
+    if (isPaused && currentAudio) {
+      currentAudio.play();
+      setIsPaused(false);
+      setSpeaking(true);
+      setIsLoadingAudio(false);
+      // Resume from current segment
+      await playPodcastWithVoicesElevenLabs(podcast, currentSegmentIndex);
+      return;
+    }
+    setIsPaused(false);
+    setIsStopped(false);
+    await playPodcastWithVoicesElevenLabs(podcast, 0);
+  }
+
+  function handlePause() {
+    if (currentAudio) {
+      currentAudio.pause();
+      setIsPaused(true);
+      setSpeaking(false);
+    }
+  }
+
+  function handleResume() {
+    if (currentAudio) {
+      currentAudio.play();
+      setIsPaused(false);
+      setSpeaking(true);
+    } else {
+      // Resume from current segment
+      playPodcastWithVoicesElevenLabs(podcast, currentSegmentIndex);
+    }
+  }
+
+  function handleStop() {
+    setIsStopped(true);
+    setIsPaused(false);
+    setSpeaking(false);
+    setIsLoadingAudio(false);
+    if (currentAudio) {
+      currentAudio.pause();
+      setCurrentAudio(null);
+    }
+    setCurrentSegmentIndex(0);
   }
 
   return (
@@ -229,8 +326,19 @@ export default function PodcastPage() {
                 {isLoadingAudio && speaking
                   ? "Loading..."
                   : speaking
-                  ? "Stop"
+                  ? "Pause"
+                  : isPaused
+                  ? "Resume"
                   : "Speak"}
+              </Button>
+              <Button
+                onClick={handleStop}
+                variant="destructive"
+                size="sm"
+                className="border-slate-600 text-slate-300 hover:bg-slate-600"
+                disabled={!speaking && !isPaused}
+              >
+                Stop
               </Button>
             </div>
           </div>
