@@ -21,6 +21,8 @@ export default function PodcastPage() {
   const [pastChats, setPastChats] = useState<any[]>([]);
   const [user, setUser] = useState<any>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [showFullPodcast, setShowFullPodcast] = useState(false);
+  const [expandedPastChats, setExpandedPastChats] = useState<{ [id: string]: boolean }>({});
 
   // Auth state
   useEffect(() => {
@@ -170,6 +172,18 @@ export default function PodcastPage() {
     }
   }
 
+  // Helper to get preview text (first 500 chars or 10 lines)
+  function getPreview(text: string) {
+    const lines = text.split("\n");
+    if (lines.length > 10) {
+      return lines.slice(0, 10).join("\n") + "...";
+    }
+    if (text.length > 500) {
+      return text.slice(0, 500) + "...";
+    }
+    return text;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950/20 to-slate-950 py-8">
       <div className="container mx-auto px-4 max-w-2xl">
@@ -202,7 +216,19 @@ export default function PodcastPage() {
           <div className="mt-8 bg-slate-900/80 p-6 rounded-xl shadow-lg">
             <h2 className="text-xl font-semibold mb-2 text-blue-300">Generated Podcast</h2>
             <div className="prose prose-invert max-w-none mb-4">
-              <ReactMarkdown>{podcast}</ReactMarkdown>
+              <ReactMarkdown>
+                {showFullPodcast ? podcast : getPreview(podcast)}
+              </ReactMarkdown>
+              {(podcast.length > 500 || podcast.split("\n").length > 10) && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="mt-2 text-blue-400 hover:underline"
+                  onClick={() => setShowFullPodcast((v) => !v)}
+                >
+                  {showFullPodcast ? "See less" : "See more"}
+                </Button>
+              )}
             </div>
             <div className="flex items-center gap-2 mb-2">
               <Button
@@ -233,19 +259,35 @@ export default function PodcastPage() {
           <div className="mt-12">
             <h2 className="text-2xl font-bold mb-4 text-white">Past Podcasts</h2>
             <div className="space-y-6">
-              {pastChats.map((chat) => (
-                <div key={chat.id} className="bg-slate-800/60 p-4 rounded-xl shadow border border-slate-700">
-                  <div className="text-slate-400 text-xs mb-1">
-                    {chat.createdAt?.toDate ? chat.createdAt.toDate().toLocaleString() : ""}
+              {pastChats.map((chat) => {
+                const isExpanded = expandedPastChats[chat.id];
+                const podcastText = chat.podcast || "";
+                return (
+                  <div key={chat.id} className="bg-slate-800/60 p-4 rounded-xl shadow border border-slate-700">
+                    <div className="text-slate-400 text-xs mb-1">
+                      {chat.createdAt?.toDate ? chat.createdAt.toDate().toLocaleString() : ""}
+                    </div>
+                    <div className="text-slate-300 text-sm mb-2">
+                      <b>Input:</b> {chat.input}
+                    </div>
+                    <div className="prose prose-invert max-w-none">
+                      <ReactMarkdown>
+                        {isExpanded ? podcastText : getPreview(podcastText)}
+                      </ReactMarkdown>
+                      {(podcastText.length > 500 || podcastText.split("\n").length > 10) && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="mt-2 text-blue-400 hover:underline"
+                          onClick={() => setExpandedPastChats((prev) => ({ ...prev, [chat.id]: !prev[chat.id] }))}
+                        >
+                          {isExpanded ? "See less" : "See more"}
+                        </Button>
+                      )}
+                    </div>
                   </div>
-                  <div className="text-slate-300 text-sm mb-2">
-                    <b>Input:</b> {chat.input}
-                  </div>
-                  <div className="prose prose-invert max-w-none">
-                    <ReactMarkdown>{chat.podcast}</ReactMarkdown>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
