@@ -12,7 +12,6 @@ import { AIResponseBox } from "@/components/ai-response-box"
 import { auth, db } from "@/lib/firebase"
 import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth"
 import { collection, addDoc, Timestamp } from "firebase/firestore"
-
 const IMGBB_API_KEY = process.env.NEXT_PUBLIC_IMGBB_API_KEY;
 
 export default function WritePage() {

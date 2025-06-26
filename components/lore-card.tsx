@@ -7,7 +7,6 @@ import { CanonStatusBadge } from "./canon-status-badge"
 import { VoteButton } from "./vote-button"
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { useState } from "react"
-import { ethers } from "ethers"
 
 interface LoreEntry {
   id: string
@@ -19,18 +18,12 @@ interface LoreEntry {
   votes: number
   aiGenerated?: boolean
   authorWallet?: string | null
-  upvotes?: string[]
-  downvotes?: string[]
+  imageUrl?: string
 }
 
 interface LoreCardProps {
   entry: LoreEntry
 }
-
-const USDC_ADDRESS = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48" // Ethereum mainnet USDC
-const USDC_ABI = [
-  "function transfer(address to, uint256 amount) public returns (bool)"
-]
 
 export function LoreCard({ entry }: LoreCardProps) {
   const [tipAmount, setTipAmount] = useState(1)
@@ -38,16 +31,12 @@ export function LoreCard({ entry }: LoreCardProps) {
   const [tipSuccess, setTipSuccess] = useState(false)
   const [tipError, setTipError] = useState<string | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
-  const [showPayWithMetaMask, setShowPayWithMetaMask] = useState(false)
-  const [pendingTx, setPendingTx] = useState<string | null>(null)
   const canTip = !!entry.authorWallet
 
   const handleTip = async () => {
     setTipLoading(true)
     setTipError(null)
     setTipSuccess(false)
-    setShowPayWithMetaMask(false)
-    setPendingTx(null)
     try {
       const res = await fetch("/api/tip", {
         method: "POST",
@@ -61,49 +50,12 @@ export function LoreCard({ entry }: LoreCardProps) {
           setTipSuccess(false)
         }, 1500)
       } else if (res.status === 402) {
-        setShowPayWithMetaMask(true)
-        setTipError("Payment required. Please complete payment with MetaMask.")
+        setTipError("Payment required. Please complete payment.")
       } else {
         setTipError("Failed to send tip.")
       }
     } catch (err) {
       setTipError("Error sending tip.")
-    }
-    setTipLoading(false)
-  }
-
-  const payWithMetaMask = async () => {
-    setTipLoading(true)
-    setTipError(null)
-    try {
-      if (!window.ethereum) throw new Error("No wallet found")
-      const provider = new ethers.BrowserProvider(window.ethereum)
-      const signer = await provider.getSigner()
-      const usdc = new ethers.Contract(USDC_ADDRESS, USDC_ABI, signer)
-      const tx = await usdc.transfer(entry.authorWallet, ethers.parseUnits(tipAmount.toString(), 6))
-      setPendingTx(tx.hash)
-      await tx.wait()
-      // Retry tip API with payment proof
-      const res = await fetch("/api/tip", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-payment-proof": tx.hash
-        },
-        body: JSON.stringify({ recipientWallet: entry.authorWallet, amount: tipAmount })
-      })
-      if (res.status === 200) {
-        setTipSuccess(true)
-        setShowPayWithMetaMask(false)
-        setTimeout(() => {
-          setModalOpen(false)
-          setTipSuccess(false)
-        }, 1500)
-      } else {
-        setTipError("Payment sent, but tip confirmation failed.")
-      }
-    } catch (err: any) {
-      setTipError(err.message || "MetaMask payment failed.")
     }
     setTipLoading(false)
   }
@@ -133,12 +85,11 @@ export function LoreCard({ entry }: LoreCardProps) {
       </CardHeader>
 
       <CardContent className="flex-1 flex flex-col">
-        {entry.coverUrl && (
+        {entry.imageUrl && (
           <div className="mb-3">
-            <img src={entry.coverUrl} alt={entry.title} className="w-full max-h-48 object-cover rounded border border-[#f5e6b2] mx-auto" />
+            <img src={entry.imageUrl} alt={entry.title} className="w-full max-h-48 object-cover rounded border border-[#f5e6b2] mx-auto" />
           </div>
         )}
-        <pre className="text-xs text-gray-400 mb-2 overflow-x-auto">{JSON.stringify(entry, null, 2)}</pre>
         <CardDescription className="text-slate-300 mb-4 line-clamp-3 flex-1">{entry.excerpt}</CardDescription>
 
         <div className="space-y-3 mt-auto">
@@ -189,15 +140,9 @@ export function LoreCard({ entry }: LoreCardProps) {
                   </div>
                   {tipError && <div className="text-red-500 text-xs">{tipError}</div>}
                   {tipSuccess && <div className="text-green-500 text-xs">Tip sent successfully!</div>}
-                  {pendingTx && <div className="text-xs text-blue-400">Tx: {pendingTx}</div>}
-                  {showPayWithMetaMask && (
-                    <Button variant="secondary" className="w-full" onClick={payWithMetaMask} disabled={tipLoading}>
-                      {tipLoading ? "Processing..." : "Pay with MetaMask"}
-                    </Button>
-                  )}
                 </div>
                 <DialogFooter>
-                  <Button variant="default" className="w-full mt-2" disabled={!canTip || tipLoading || showPayWithMetaMask} onClick={handleTip}>
+                  <Button variant="default" className="w-full mt-2" disabled={!canTip || tipLoading} onClick={handleTip}>
                     {tipLoading ? "Sending..." : "Confirm Tip"}
                   </Button>
                 </DialogFooter>
