@@ -138,9 +138,7 @@ export default function LorePage() {
     )
   }
 
-  const filteredStories = userPreference && userPreference !== "all"
-    ? stories.filter(entry => !entry.parentMainId && entry.category === userPreference)
-    : stories.filter(entry => !entry.parentMainId)
+  const filteredStories = stories.filter(entry => !entry.parentMainId);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 py-8">

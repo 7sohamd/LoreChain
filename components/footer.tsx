@@ -3,8 +3,8 @@ import { Github, Twitter, DiscIcon as Discord } from "lucide-react"
 
 export function Footer() {
   return (
-    <footer className="border-t border-slate-800 bg-slate-950">
-      <div className="container mx-auto px-4 py-12">
+    <footer className="bg-white border-t border-blue-100 pt-12 pb-6">
+      <div className="container mx-auto px-4">
         <div className="grid md:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="space-y-4">
@@ -71,7 +71,7 @@ export function Footer() {
         </div>
 
         <div className="border-t border-slate-800 mt-8 pt-8 flex flex-col sm:flex-row justify-between items-center">
-          <p className="text-slate-700 text-sm">© 2024 LoreChain. Building the future of collaborative storytelling.</p>
+          <p className="text-slate-700 text-sm">© 2025 LoreChain. Building the future of collaborative storytelling.</p>
           <div className="flex items-center space-x-4 mt-4 sm:mt-0">
             <a href="#" className="text-slate-700 hover:text-blue-700 transition-colors">
               <Github className="h-5 w-5" />

@@ -38,50 +38,25 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#f5f7fa] via-[#b6baff] to-[#e3eaff] relative overflow-hidden">
       {/* Hero Section */}
-      <section className="relative overflow-hidden pt-0 min-h-[calc(100vh-4rem)] flex items-center">
-  {/* Background Circles */}
-  <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0">
-    {/* SVG */}
-  </div>
-
-  {/* Main Hero Content */}
-  <div className="relative container mx-auto px-4 text-center w-full pt-24">
-    <div className="max-w-4xl mx-auto">
-      <h1 className="text-6xl md:text-7xl font-bold bg-gradient-to-r from-[#222] via-[#4b5cff] to-[#b6baff] bg-clip-text text-transparent mb-6">
-        Write the Next Universe. Together.
-      </h1>
-      <p className="text-xl md:text-2xl text-slate-700 mb-12 leading-relaxed">
-        AI-assisted, community-voted, immutable lore on-chain.
-        <br />
-        <span className="text-[#b6ffe7]">Collaborative worldbuilding for the decentralized age.</span>
-      </p>
-      <div className="flex flex-col sm:flex-row gap-4 justify-center">
-        <Button
-          asChild
-          size="lg"
-          className="bg-[#4b5cff] hover:bg-[#3a3be0] text-white px-8 py-6 text-lg font-semibold rounded-lg shadow-lg"
-        >
-          <Link href="/write">
-            <Pen className="mr-2 h-5 w-5" />
-            Start Writing
-          </Link>
-        </Button>
-        <Button
-          asChild
-          variant="outline"
-          size="lg"
-          className="bg-white/80 text-[#4b5cff] border border-[#b6baff] px-8 py-6 text-lg font-semibold rounded-lg shadow-lg"
-        >
-          <Link href="/lore">
-            <Globe className="mr-2 h-5 w-5" />
-            Explore Canon
-          </Link>
-        </Button>
-      </div>
-    </div>
-  </div>
-</section>
-
+      <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#f5f7fa] via-[#e3eaff] to-[#b6baff]">
+        <div className="text-center w-full">
+          <h1 className="text-6xl md:text-7xl font-bold text-slate-900 mb-6">
+            Write the <span className="text-blue-600">Next Universe</span>. Together.
+          </h1>
+          <p className="text-xl md:text-2xl text-slate-700 mb-8">
+            AI-assisted, community-voted, immutable lore on-chain.<br/>
+            <span className="text-blue-500">Collaborative worldbuilding for the decentralized age.</span>
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button className="bg-blue-600 text-white px-8 py-6 text-lg font-semibold rounded-lg shadow hover:bg-blue-700">
+              Start Writing
+            </Button>
+            <Button className="bg-white border border-blue-200 text-blue-700 px-8 py-6 text-lg font-semibold rounded-lg shadow hover:bg-blue-50">
+              Explore Canon
+            </Button>
+          </div>
+        </div>
+      </section>
 
       {/* How It Works */}
       <section className="py-24 bg-white/80">
@@ -123,11 +98,11 @@ export default function HomePage() {
       </section>
 
       {/* Featured Canon Entries */}
-      <section className="py-24">
+      <section className="py-24 bg-blue-50/60">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between mb-12">
-            <h2 className="text-4xl font-bold text-white">Featured Canon</h2>
-            <Button asChild variant="outline" className="border-purple-500/50 text-purple-300 hover:bg-purple-500/10">
+            <h2 className="text-4xl font-bold text-slate-900">Featured Canon</h2>
+            <Button asChild variant="outline" className="border-blue-300 text-blue-700 hover:bg-blue-100">
               <Link href="/lore">
                 View All <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
@@ -137,22 +112,22 @@ export default function HomePage() {
             {featuredEntries.map((entry) => (
               <Card
                 key={entry.id}
-                className="bg-slate-800/50 border-slate-700 hover:border-purple-500/50 transition-colors group"
+                className="bg-white border border-blue-100 hover:border-blue-300 transition-colors group"
               >
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div>
-                      <CardTitle className="text-white group-hover:text-purple-300 transition-colors">
+                      <CardTitle className="text-slate-900 group-hover:text-blue-700 transition-colors">
                         {entry.title}
                       </CardTitle>
                       <div className="flex items-center gap-2 mt-2">
-                        <Badge variant="secondary" className="bg-slate-700 text-slate-300">
+                        <Badge variant="secondary" className="bg-blue-100 text-blue-700">
                           {entry.type}
                         </Badge>
                         {entry.isCanon ? (
-                          <Badge className="bg-green-600/20 text-green-400 border-green-500/50">✅ Canon</Badge>
+                          <Badge className="bg-green-100 text-green-700 border-green-300">✅ Canon</Badge>
                         ) : (
-                          <Badge variant="outline" className="border-yellow-500/50 text-yellow-400">
+                          <Badge variant="outline" className="border-yellow-300 text-yellow-700">
                             ⏳ Pending
                           </Badge>
                         )}
@@ -161,10 +136,10 @@ export default function HomePage() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <CardDescription className="text-slate-300 mb-4 line-clamp-3">{entry.excerpt}</CardDescription>
+                  <CardDescription className="text-slate-700 mb-4 line-clamp-3">{entry.excerpt}</CardDescription>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-slate-400">by {entry.author}</span>
-                    <Button asChild variant="ghost" size="sm" className="text-purple-400 hover:text-purple-300">
+                    <span className="text-sm text-slate-500">by {entry.author}</span>
+                    <Button asChild variant="ghost" size="sm" className="text-blue-600 hover:text-blue-800">
                       <Link href={`/lore/${entry.id}`}>
                         View {entry.isCanon ? "Canon" : "Entry"} <ArrowRight className="ml-1 h-3 w-3" />
                       </Link>
@@ -178,21 +153,17 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 bg-gradient-to-r from-purple-900/20 to-blue-900/20">
+      <section className="py-24 bg-white">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-4xl font-bold mb-6 text-white">Ready to Shape Reality?</h2>
-          <p className="text-xl text-slate-300 mb-8 max-w-2xl mx-auto">
+          <h2 className="text-4xl font-bold mb-6 text-slate-900">Ready to Shape Reality?</h2>
+          <p className="text-xl text-slate-700 mb-8 max-w-2xl mx-auto">
             Join thousands of creators building the most ambitious collaborative universe ever conceived.
           </p>
           <Button
             asChild
-            size="lg"
-            className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-6 text-lg"
+            className="bg-blue-600 text-white px-8 py-6 text-lg font-semibold rounded-lg shadow hover:bg-blue-700"
           >
-            <Link href="/write">
-              <Sparkles className="mr-2 h-5 w-5" />
-              Begin Your Legend
-            </Link>
+            <a href="/write">Start Writing</a>
           </Button>
         </div>
       </section>
