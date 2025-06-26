@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Menu, User, LogOut } from "lucide-react"
 import { auth, provider } from "@/lib/firebase"
-import { signInWithPopup, signOut, onAuthStateChanged, User as FirebaseUser } from "firebase/auth"
+import type { User as FirebaseUser } from "firebase/auth"
+import { signInWithPopup, signOut, onAuthStateChanged } from "firebase/auth"
 
 export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
