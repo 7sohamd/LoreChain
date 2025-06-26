@@ -5,14 +5,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Sparkles, Copy, Plus, Volume2, Loader2, Square } from "lucide-react"
 import { useRef, useState } from "react"
 
-const ELEVENLABS_VOICES = [
-  { id: "JBFqnCBsd6RMkjVDRZzb", name: "Rachel (English)" },
-  { id: "21m00Tcm4TlvDq8ikWAM", name: "Adam (English)" },
-  { id: "AZnzlk1XvdvUeBnXmlld", name: "Antoni (English)" },
-  { id: "EXAVITQu4vr4xnSDxMaL", name: "Elli (English)" },
-  // Add more voices as desired
-]
-
 interface AIResponseBoxProps {
   suggestions: string[]
   isLoading: boolean
@@ -23,7 +15,6 @@ export function AIResponseBox({ suggestions, isLoading, onSelectSuggestion }: AI
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
   const [speakingIndex, setSpeakingIndex] = useState<number | null>(null)
   const [isLoadingAudio, setIsLoadingAudio] = useState(false)
-  const [voiceId, setVoiceId] = useState(ELEVENLABS_VOICES[0].id)
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
   const handleCopy = async (text: string, index: number) => {
@@ -33,50 +24,32 @@ export function AIResponseBox({ suggestions, isLoading, onSelectSuggestion }: AI
   }
 
   const handleSpeak = async (text: string, index: number) => {
-    if (speakingIndex === index && audioRef.current) {
-      audioRef.current.pause()
-      audioRef.current.currentTime = 0
-      audioRef.current = null
-      setSpeakingIndex(null)
-      setIsLoadingAudio(false)
-      return
+    if (speakingIndex === index) {
+      window.speechSynthesis.cancel();
+      setSpeakingIndex(null);
+      setIsLoadingAudio(false);
+      return;
     }
-    if (audioRef.current) {
-      audioRef.current.pause()
-      audioRef.current.currentTime = 0
-      audioRef.current = null
-    }
-    setIsLoadingAudio(true)
-    setSpeakingIndex(index)
+    window.speechSynthesis.cancel();
+    setIsLoadingAudio(true);
+    setSpeakingIndex(index);
     try {
-      const response = await fetch('/api/elevenlabs-tts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, voiceId }),
-      })
-      if (!response.ok) {
-        const error = await response.text()
-        throw new Error(error)
-      }
-      const audioBlob = await response.blob()
-      const audioUrl = URL.createObjectURL(audioBlob)
-      const audio = new Audio(audioUrl)
-      audioRef.current = audio
-      audio.onended = () => {
-        URL.revokeObjectURL(audioUrl)
-        audioRef.current = null
-        setSpeakingIndex(null)
-        setIsLoadingAudio(false)
-      }
-      audio.onpause = () => {
-        setIsLoadingAudio(false)
-      }
-      await audio.play()
-      setIsLoadingAudio(false)
+      const utter = new window.SpeechSynthesisUtterance(text);
+      utter.onend = () => {
+        setSpeakingIndex(null);
+        setIsLoadingAudio(false);
+      };
+      utter.onerror = () => {
+        setSpeakingIndex(null);
+        setIsLoadingAudio(false);
+        alert('TTS failed.');
+      };
+      window.speechSynthesis.speak(utter);
+      setIsLoadingAudio(false);
     } catch (error) {
-      setSpeakingIndex(null)
-      setIsLoadingAudio(false)
-      alert('TTS failed: ' + (error as Error).message)
+      setSpeakingIndex(null);
+      setIsLoadingAudio(false);
+      alert('TTS failed: ' + (error as Error).message);
     }
   }
 
@@ -113,19 +86,6 @@ export function AIResponseBox({ suggestions, isLoading, onSelectSuggestion }: AI
         <CardDescription className="text-slate-300">
           Select a suggestion to add to your lore, or use them as inspiration
         </CardDescription>
-        <div className="mt-4">
-          <label htmlFor="voice-select" className="text-slate-300 text-sm mr-2">Voice:</label>
-          <select
-            id="voice-select"
-            value={voiceId}
-            onChange={e => setVoiceId(e.target.value)}
-            className="bg-slate-700 text-slate-200 rounded px-2 py-1 border border-slate-600 focus:outline-none"
-          >
-            {ELEVENLABS_VOICES.map(v => (
-              <option key={v.id} value={v.id}>{v.name}</option>
-            ))}
-          </select>
-        </div>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
