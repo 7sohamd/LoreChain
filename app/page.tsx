@@ -70,7 +70,7 @@ export default function HomePage() {
             </span>
             . Together.
           </h1>
-          <p className="text-xl md:text-2xl text-[#5c4a1a] mb-8">
+          <p className="text-xl md:text-2xl text-[#5c4a1a] mb-8 font-mono">
             AI-assisted, community-voted, immutable lore on-chain.<br/>
             <span className="text-[#5c4a1a]">Collaborative worldbuilding for the decentralized age.</span>
           </p>
@@ -95,7 +95,7 @@ export default function HomePage() {
                 <Pen className="h-10 w-10 text-blue-400" />
               </div>
               <h3 className="text-2xl font-semibold mb-4 text-slate-800">✍️ Write or Expand</h3>
-              <p className="text-slate-600 leading-relaxed">
+              <p className="text-slate-600 leading-relaxed font-mono">
                 Create new lore or expand existing entries with AI assistance. Tag your content as characters, places,
                 factions, events, or objects.
               </p>
@@ -105,7 +105,7 @@ export default function HomePage() {
                 <Vote className="h-10 w-10 text-green-400" />
               </div>
               <h3 className="text-2xl font-semibold mb-4 text-slate-800">✅ Community Vote</h3>
-              <p className="text-slate-600 leading-relaxed">
+              <p className="text-slate-600 leading-relaxed font-mono">
                 Submit your lore to the community for voting. Quality entries that enhance the universe get approved by
                 consensus.
               </p>
@@ -115,7 +115,7 @@ export default function HomePage() {
                 <Chain className="h-10 w-10 text-cyan-400" />
               </div>
               <h3 className="text-2xl font-semibold mb-4 text-slate-800">🪐 Canonized On-Chain</h3>
-              <p className="text-slate-600 leading-relaxed">
+              <p className="text-slate-600 leading-relaxed font-mono">
                 Approved lore becomes permanent canon, stored immutably on-chain via IPFS. Your contributions become
                 part of the eternal universe.
               </p>
@@ -183,7 +183,7 @@ export default function HomePage() {
       <section className="py-24 bg-[#fff]">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-4xl font-bold mb-6 text-[#3d2c00]">Ready to Shape Reality?</h2>
-          <p className="text-xl text-[#5c4a1a] mb-8 max-w-2xl mx-auto">
+          <p className="text-xl text-[#5c4a1a] mb-8 max-w-2xl mx-auto font-mono">
             Join thousands of creators building the most ambitious collaborative universe ever conceived.
           </p>
           <Button

@@ -16,6 +16,7 @@ export default function LorePage() {
   const [user, setUser] = useState<FirebaseUser | null>(null)
   const [loading, setLoading] = useState(true)
   const [wallets, setWallets] = useState<{ [uid: string]: string | null }>({})
+  const [search, setSearch] = useState("")
 
   // Auth state
   useEffect(() => {
@@ -78,7 +79,15 @@ export default function LorePage() {
   if (loading) return <div className="text-center py-12 text-slate-300">Loading...</div>
 
   // Show all stories
-  const filteredLores = lores
+  const filteredLores = lores.filter(entry => {
+    if (!search.trim()) return true;
+    const s = search.trim().toLowerCase();
+    return (
+      (entry.title && entry.title.toLowerCase().includes(s)) ||
+      (entry.content && entry.content.toLowerCase().includes(s)) ||
+      (entry.category && entry.category.toLowerCase().includes(s))
+    );
+  });
 
   // Calculate trending story (most continuations)
   const continuationCounts: { [id: string]: number } = {};
@@ -107,24 +116,9 @@ export default function LorePage() {
               <Input
                 placeholder="Search lore entries..."
                 className="pl-10 bg-slate-800 border-slate-700 text-white placeholder:text-slate-400"
-                disabled
+                value={search}
+                onChange={e => setSearch(e.target.value)}
               />
-            </div>
-            <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4 text-slate-400" />
-              <Select>
-                <SelectTrigger className="w-40 bg-slate-800 border-slate-700 text-white">
-                  <SelectValue placeholder="All Types" />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-700">
-                  <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="character">Character</SelectItem>
-                  <SelectItem value="place">Place</SelectItem>
-                  <SelectItem value="faction">Faction</SelectItem>
-                  <SelectItem value="event">Event</SelectItem>
-                  <SelectItem value="object">Object</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
           </div>
           <Tabs className="w-full">
