@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Pen, Globe, ArrowRight, Sparkles, Vote, CircleIcon as Chain } from "lucide-react"
 import Link from "next/link"
+import { cn } from "@/lib/utils"
 
 const featuredEntries = [
   {
@@ -36,22 +37,48 @@ const featuredEntries = [
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#f5f7fa] via-[#b6baff] to-[#e3eaff] relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-[#fff9de] via-[#fff] to-[#fff9de] relative overflow-hidden">
       {/* Hero Section */}
-      <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#f5f7fa] via-[#e3eaff] to-[#b6baff]">
-        <div className="text-center w-full">
-          <h1 className="text-6xl md:text-7xl font-bold text-slate-900 mb-6">
-            Write the <span className="text-blue-600">Next Universe</span>. Together.
+      <section className="min-h-screen flex items-center justify-center bg-[#fff9de] relative overflow-hidden">
+        {/* Grid background for hero section */}
+        <div className={
+          cn(
+            "absolute inset-0 z-0",
+            "[background-size:40px_40px]",
+            "[background-image:linear-gradient(to_right,#FBE19D_1px,transparent_1px),linear-gradient(to_bottom,#FBE19D_1px,transparent_1px)]"
+          )
+        } />
+        {/* Radial gradient mask for faded look */}
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-[#fff9de] [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]"></div>
+        <div className="text-center w-full relative z-10">
+          <h1 className="text-6xl md:text-7xl font-bold text-[#3d2c00] mb-6">
+            Write the {" "}
+            <span
+              style={{
+                background: "linear-gradient(90deg,#60a5fa,#a78bfa,#fde68a,#f472b6,#fff,#60a5fa)",
+                backgroundSize: "300% 300%",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+                color: "transparent",
+                animation: "glowing-gradient 8s ease-in-out infinite",
+                filter: "drop-shadow(0 0 8px #fff9de)"
+              }}
+              className="inline-block"
+            >
+              Next Universe
+            </span>
+            . Together.
           </h1>
-          <p className="text-xl md:text-2xl text-slate-700 mb-8">
+          <p className="text-xl md:text-2xl text-[#5c4a1a] mb-8">
             AI-assisted, community-voted, immutable lore on-chain.<br/>
-            <span className="text-blue-500">Collaborative worldbuilding for the decentralized age.</span>
+            <span className="text-[#5c4a1a]">Collaborative worldbuilding for the decentralized age.</span>
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button className="bg-blue-600 text-white px-8 py-6 text-lg font-semibold rounded-lg shadow hover:bg-blue-700">
+            <Button className="bg-[#ffb300] text-[#3d2c00] px-8 py-6 text-lg font-semibold rounded-lg shadow hover:bg-[#ffd54f]">
               Start Writing
             </Button>
-            <Button className="bg-white border border-blue-200 text-blue-700 px-8 py-6 text-lg font-semibold rounded-lg shadow hover:bg-blue-50">
+            <Button className="bg-white border border-[#ffb300] text-[#a3a380] px-8 py-6 text-lg font-semibold rounded-lg shadow hover:bg-[#fff9de]">
               Explore Canon
             </Button>
           </div>
@@ -59,7 +86,7 @@ export default function HomePage() {
       </section>
 
       {/* How It Works */}
-      <section className="py-24 bg-white/80">
+      <section className="py-24 bg-[#fff]">
         <div className="container mx-auto px-4">
           <h2 className="text-4xl font-bold text-center mb-16 text-slate-800">How It Works</h2>
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
@@ -98,11 +125,11 @@ export default function HomePage() {
       </section>
 
       {/* Featured Canon Entries */}
-      <section className="py-24 bg-blue-50/60">
+      <section className="py-24 bg-[#fff9de]">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between mb-12">
             <h2 className="text-4xl font-bold text-slate-900">Featured Canon</h2>
-            <Button asChild variant="outline" className="border-blue-300 text-blue-700 hover:bg-blue-100">
+            <Button asChild className="bg-[#ffb300] text-[#3d2c00] border-none shadow hover:bg-[#ffd54f]">
               <Link href="/lore">
                 View All <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
@@ -112,22 +139,22 @@ export default function HomePage() {
             {featuredEntries.map((entry) => (
               <Card
                 key={entry.id}
-                className="bg-white border border-blue-100 hover:border-blue-300 transition-colors group"
+                className="bg-white border border-[#f5e6b2] hover:border-[#ffb300] transition-colors group"
               >
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div>
-                      <CardTitle className="text-slate-900 group-hover:text-blue-700 transition-colors">
+                      <CardTitle className="text-[#3d2c00] group-hover:text-[#ffb300] transition-colors">
                         {entry.title}
                       </CardTitle>
                       <div className="flex items-center gap-2 mt-2">
-                        <Badge variant="secondary" className="bg-blue-100 text-blue-700">
+                        <Badge variant="secondary" className="bg-[#fff9de] text-[#a3a380] border-[#f5e6b2]">
                           {entry.type}
                         </Badge>
                         {entry.isCanon ? (
-                          <Badge className="bg-green-100 text-green-700 border-green-300">✅ Canon</Badge>
+                          <Badge className="bg-[#fffbe9] text-[#388e3c] border-[#c8e6c9]">✅ Canon</Badge>
                         ) : (
-                          <Badge variant="outline" className="border-yellow-300 text-yellow-700">
+                          <Badge variant="outline" className="border-[#ffe082] text-[#ffb300]">
                             ⏳ Pending
                           </Badge>
                         )}
@@ -136,10 +163,10 @@ export default function HomePage() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <CardDescription className="text-slate-700 mb-4 line-clamp-3">{entry.excerpt}</CardDescription>
+                  <CardDescription className="text-[#5c4a1a] mb-4 line-clamp-3">{entry.excerpt}</CardDescription>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-slate-500">by {entry.author}</span>
-                    <Button asChild variant="ghost" size="sm" className="text-blue-600 hover:text-blue-800">
+                    <span className="text-sm text-[#a3a380]">by {entry.author}</span>
+                    <Button asChild variant="ghost" size="sm" className="text-[#ffb300] hover:text-[#3d2c00]">
                       <Link href={`/lore/${entry.id}`}>
                         View {entry.isCanon ? "Canon" : "Entry"} <ArrowRight className="ml-1 h-3 w-3" />
                       </Link>
@@ -153,15 +180,15 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 bg-white">
+      <section className="py-24 bg-[#fff]">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-4xl font-bold mb-6 text-slate-900">Ready to Shape Reality?</h2>
-          <p className="text-xl text-slate-700 mb-8 max-w-2xl mx-auto">
+          <h2 className="text-4xl font-bold mb-6 text-[#3d2c00]">Ready to Shape Reality?</h2>
+          <p className="text-xl text-[#5c4a1a] mb-8 max-w-2xl mx-auto">
             Join thousands of creators building the most ambitious collaborative universe ever conceived.
           </p>
           <Button
             asChild
-            className="bg-blue-600 text-white px-8 py-6 text-lg font-semibold rounded-lg shadow hover:bg-blue-700"
+            className="bg-[#ffb300] text-[#3d2c00] px-8 py-6 text-lg font-semibold rounded-lg shadow hover:bg-[#ffd54f]"
           >
             <a href="/write">Start Writing</a>
           </Button>
