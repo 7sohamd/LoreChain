@@ -52,32 +52,18 @@ export default function HomePage() {
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-[#fff9de] [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]"></div>
         <div className="text-center w-full relative z-10">
           <h1 className="text-6xl md:text-7xl font-bold text-[#3d2c00] mb-6">
-            Write the {" "}
-            <span
-              style={{
-                background: "linear-gradient(90deg,#60a5fa,#a78bfa,#fde68a,#f472b6,#fff,#60a5fa)",
-                backgroundSize: "300% 300%",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-                color: "transparent",
-                animation: "glowing-gradient 8s ease-in-out infinite",
-                filter: "drop-shadow(0 0 8px #fff9de)"
-              }}
-              className="inline-block"
-            >
-              Next Universe
-            </span>
-            . Together.
+            Write the <span className="bg-gradient-to-r from-blue-400 via-pink-400 to-yellow-300 bg-clip-text text-transparent inline-block">Next Universe</span>. Together.
           </h1>
-          <p className="text-xl md:text-2xl text-[#5c4a1a] mb-8">
+          <p className="text-xl md:text-2xl text-[#5c4a1a] mb-8 font-mono typewriter">
             AI-assisted, community-voted, immutable lore on-chain.<br/>
-            <span className="text-[#5c4a1a]">Collaborative worldbuilding for the decentralized age.</span>
+            Collaborative worldbuilding for the decentralized age.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button className="bg-[#ffb300] text-[#3d2c00] px-8 py-6 text-lg font-semibold rounded-lg shadow hover:bg-[#ffd54f]">
-              Start Writing
-            </Button>
+            <Link href="/write" passHref legacyBehavior>
+              <Button className="bg-[#ffb300] text-[#3d2c00] px-8 py-6 text-lg font-semibold rounded-lg shadow hover:bg-[#ffd54f]">
+                Start Writing
+              </Button>
+            </Link>
             <Button className="bg-white border border-[#ffb300] text-[#a3a380] px-8 py-6 text-lg font-semibold rounded-lg shadow hover:bg-[#fff9de]">
               Explore Canon
             </Button>
@@ -95,7 +81,7 @@ export default function HomePage() {
                 <Pen className="h-10 w-10 text-blue-400" />
               </div>
               <h3 className="text-2xl font-semibold mb-4 text-slate-800">✍️ Write or Expand</h3>
-              <p className="text-slate-600 leading-relaxed">
+              <p className="text-slate-600 leading-relaxed font-mono">
                 Create new lore or expand existing entries with AI assistance. Tag your content as characters, places,
                 factions, events, or objects.
               </p>
@@ -105,7 +91,7 @@ export default function HomePage() {
                 <Vote className="h-10 w-10 text-green-400" />
               </div>
               <h3 className="text-2xl font-semibold mb-4 text-slate-800">✅ Community Vote</h3>
-              <p className="text-slate-600 leading-relaxed">
+              <p className="text-slate-600 leading-relaxed font-mono">
                 Submit your lore to the community for voting. Quality entries that enhance the universe get approved by
                 consensus.
               </p>
@@ -115,7 +101,7 @@ export default function HomePage() {
                 <Chain className="h-10 w-10 text-cyan-400" />
               </div>
               <h3 className="text-2xl font-semibold mb-4 text-slate-800">🪐 Canonized On-Chain</h3>
-              <p className="text-slate-600 leading-relaxed">
+              <p className="text-slate-600 leading-relaxed font-mono">
                 Approved lore becomes permanent canon, stored immutably on-chain via IPFS. Your contributions become
                 part of the eternal universe.
               </p>
@@ -183,7 +169,7 @@ export default function HomePage() {
       <section className="py-24 bg-[#fff]">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-4xl font-bold mb-6 text-[#3d2c00]">Ready to Shape Reality?</h2>
-          <p className="text-xl text-[#5c4a1a] mb-8 max-w-2xl mx-auto">
+          <p className="text-xl text-[#5c4a1a] mb-8 max-w-2xl mx-auto font-mono">
             Join thousands of creators building the most ambitious collaborative universe ever conceived.
           </p>
           <Button

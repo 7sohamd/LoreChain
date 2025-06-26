@@ -111,11 +111,26 @@ body {
     #fff,      /* white */
     #60a5fa    /* blue again for smooth loop */
   );
-  background-size: 300% 300%;
-  animation: glowing-gradient 8s ease-in-out infinite;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-fill-color: transparent;
+  background-size: 400% 400%;
+  animation: glowing-gradient 8s ease-in-out infinite !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  color: transparent !important;
   filter: drop-shadow(0 0 8px #fff9de);
+}
+
+.typewriter {
+  overflow: hidden;
+  white-space: nowrap;
+  border-right: 2px solid #5c4a1a;
+  animation: typing 3.5s steps(60, end) 1, blink-caret 0.75s step-end infinite;
+}
+@keyframes typing {
+  from { width: 0 }
+  to { width: 100% }
+}
+@keyframes blink-caret {
+  from, to { border-color: transparent }
+  50% { border-color: #5c4a1a; }
 }

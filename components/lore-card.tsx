@@ -18,6 +18,8 @@ interface LoreEntry {
   votes: number
   aiGenerated?: boolean
   authorWallet?: string | null
+  imageUrl?: string
+  coverUrl?: string
 }
 
 interface LoreCardProps {
@@ -84,6 +86,12 @@ export function LoreCard({ entry }: LoreCardProps) {
       </CardHeader>
 
       <CardContent className="flex-1 flex flex-col">
+        {entry.coverUrl && (
+          <div className="mb-3">
+            <img src={entry.coverUrl} alt={entry.title} className="w-full max-h-48 object-cover rounded border border-[#f5e6b2] mx-auto" />
+          </div>
+        )}
+        <pre className="text-xs text-gray-400 mb-2 overflow-x-auto">{JSON.stringify(entry, null, 2)}</pre>
         <CardDescription className="text-slate-300 mb-4 line-clamp-3 flex-1">{entry.excerpt}</CardDescription>
 
         <div className="space-y-3 mt-auto">
