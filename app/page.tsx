@@ -36,58 +36,64 @@ const featuredEntries = [
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950">
+    <div className="min-h-screen bg-gradient-to-br from-[#f5f7fa] via-[#b6baff] to-[#e3eaff] relative overflow-hidden">
       {/* Hero Section */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-blue-500/10 blur-3xl" />
-        <div className="relative container mx-auto px-4 py-24 text-center">
-          <div className="max-w-4xl mx-auto">
-            <h1 className="text-6xl md:text-7xl font-bold bg-gradient-to-r from-purple-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent mb-6">
-              Write the Next Universe. Together.
-            </h1>
-            <p className="text-xl md:text-2xl text-slate-300 mb-12 leading-relaxed">
-              AI-assisted, community-voted, immutable lore on-chain.
-              <br />
-              <span className="text-purple-400">Collaborative worldbuilding for the decentralized age.</span>
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button
-                asChild
-                size="lg"
-                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-6 text-lg"
-              >
-                <Link href="/write">
-                  <Pen className="mr-2 h-5 w-5" />
-                  Start Writing
-                </Link>
-              </Button>
-              <Button
-                asChild
-                variant="outline"
-                size="lg"
-                className="border-purple-500/50 text-purple-300 hover:bg-purple-500/10 px-8 py-6 text-lg"
-              >
-                <Link href="/lore">
-                  <Globe className="mr-2 h-5 w-5" />
-                  Explore Canon
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
+      <section className="relative overflow-hidden pt-0 min-h-[calc(100vh-4rem)] flex items-center">
+  {/* Background Circles */}
+  <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0">
+    {/* SVG */}
+  </div>
+
+  {/* Main Hero Content */}
+  <div className="relative container mx-auto px-4 text-center w-full pt-24">
+    <div className="max-w-4xl mx-auto">
+      <h1 className="text-6xl md:text-7xl font-bold bg-gradient-to-r from-[#222] via-[#4b5cff] to-[#b6baff] bg-clip-text text-transparent mb-6">
+        Write the Next Universe. Together.
+      </h1>
+      <p className="text-xl md:text-2xl text-slate-700 mb-12 leading-relaxed">
+        AI-assisted, community-voted, immutable lore on-chain.
+        <br />
+        <span className="text-[#b6ffe7]">Collaborative worldbuilding for the decentralized age.</span>
+      </p>
+      <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        <Button
+          asChild
+          size="lg"
+          className="bg-[#4b5cff] hover:bg-[#3a3be0] text-white px-8 py-6 text-lg font-semibold rounded-lg shadow-lg"
+        >
+          <Link href="/write">
+            <Pen className="mr-2 h-5 w-5" />
+            Start Writing
+          </Link>
+        </Button>
+        <Button
+          asChild
+          variant="outline"
+          size="lg"
+          className="bg-white/80 text-[#4b5cff] border border-[#b6baff] px-8 py-6 text-lg font-semibold rounded-lg shadow-lg"
+        >
+          <Link href="/lore">
+            <Globe className="mr-2 h-5 w-5" />
+            Explore Canon
+          </Link>
+        </Button>
+      </div>
+    </div>
+  </div>
+</section>
+
 
       {/* How It Works */}
-      <section className="py-24 bg-slate-900/50">
+      <section className="py-24 bg-white/80">
         <div className="container mx-auto px-4">
-          <h2 className="text-4xl font-bold text-center mb-16 text-white">How It Works</h2>
+          <h2 className="text-4xl font-bold text-center mb-16 text-slate-800">How It Works</h2>
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             <div className="text-center group">
-              <div className="bg-gradient-to-br from-purple-600/20 to-blue-600/20 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
-                <Pen className="h-10 w-10 text-purple-400" />
+              <div className="bg-gradient-to-br from-blue-200/40 to-blue-100/40 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+                <Pen className="h-10 w-10 text-blue-400" />
               </div>
-              <h3 className="text-2xl font-semibold mb-4 text-white">✍️ Write or Expand</h3>
-              <p className="text-slate-300 leading-relaxed">
+              <h3 className="text-2xl font-semibold mb-4 text-slate-800">✍️ Write or Expand</h3>
+              <p className="text-slate-600 leading-relaxed">
                 Create new lore or expand existing entries with AI assistance. Tag your content as characters, places,
                 factions, events, or objects.
               </p>
@@ -96,8 +102,8 @@ export default function HomePage() {
               <div className="bg-gradient-to-br from-green-600/20 to-emerald-600/20 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
                 <Vote className="h-10 w-10 text-green-400" />
               </div>
-              <h3 className="text-2xl font-semibold mb-4 text-white">✅ Community Vote</h3>
-              <p className="text-slate-300 leading-relaxed">
+              <h3 className="text-2xl font-semibold mb-4 text-slate-800">✅ Community Vote</h3>
+              <p className="text-slate-600 leading-relaxed">
                 Submit your lore to the community for voting. Quality entries that enhance the universe get approved by
                 consensus.
               </p>
@@ -106,8 +112,8 @@ export default function HomePage() {
               <div className="bg-gradient-to-br from-cyan-600/20 to-blue-600/20 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
                 <Chain className="h-10 w-10 text-cyan-400" />
               </div>
-              <h3 className="text-2xl font-semibold mb-4 text-white">🪐 Canonized On-Chain</h3>
-              <p className="text-slate-300 leading-relaxed">
+              <h3 className="text-2xl font-semibold mb-4 text-slate-800">🪐 Canonized On-Chain</h3>
+              <p className="text-slate-600 leading-relaxed">
                 Approved lore becomes permanent canon, stored immutably on-chain via IPFS. Your contributions become
                 part of the eternal universe.
               </p>

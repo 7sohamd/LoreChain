@@ -45,15 +45,15 @@ export function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full border-b border-slate-800 bg-slate-950/95 backdrop-blur supports-[backdrop-filter]:bg-slate-950/60">
+      <header className="sticky top-0 z-50 w-full bg-white/70 backdrop-blur-md border-b border-blue-100">
         <div className="container mx-auto px-4">
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}
             <Link href="/" className="flex items-center space-x-2">
-              <div className="h-8 w-8 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">LC</span>
+              <div className="h-8 w-8 bg-gradient-to-br from-blue-400 to-blue-200 rounded-lg flex items-center justify-center">
+                <span className="text-blue-700 font-bold text-sm">LC</span>
               </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+              <span className="text-xl font-bold bg-gradient-to-r from-blue-700 to-blue-400 bg-clip-text text-transparent">
                 LoreChain
               </span>
             </Link>
@@ -61,7 +61,7 @@ export function Header() {
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-6">
               {navigation.map((item) => (
-                <Link key={item.name} href={item.href} className="text-slate-300 hover:text-white transition-colors">
+                <Link key={item.name} href={item.href} className="text-slate-700 hover:text-blue-700 transition-colors">
                   {item.name}
                 </Link>
               ))}
@@ -71,13 +71,13 @@ export function Header() {
             <div className="hidden sm:flex items-center space-x-2">
               {user ? (
                 <>
-                  <span className="text-slate-300 font-mono text-sm">{user.displayName || user.email}</span>
-                  <Button variant="ghost" size="sm" onClick={handleSignOut} className="text-slate-400 hover:text-white">
+                  <span className="text-slate-700 font-mono text-sm">{user.displayName || user.email}</span>
+                  <Button variant="ghost" size="sm" onClick={handleSignOut} className="text-blue-700 hover:text-blue-900">
                     <LogOut className="h-4 w-4" />
                   </Button>
                 </>
               ) : (
-                <Button variant="outline" size="sm" className="text-slate-400 hover:text-white" onClick={handleSignIn}>Sign In</Button>
+                <Button variant="outline" size="sm" className="text-blue-700 hover:text-blue-900 border-blue-200" onClick={handleSignIn}>Sign In</Button>
               )}
             </div>
 
@@ -85,16 +85,16 @@ export function Header() {
             <Sheet>
               <SheetTrigger asChild className="md:hidden">
                 <Button variant="ghost" size="sm">
-                  <Menu className="h-5 w-5" />
+                  <Menu className="h-5 w-5 text-blue-700" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="bg-slate-900 border-slate-800">
+              <SheetContent side="right" className="bg-white border-blue-100">
                 <div className="flex flex-col space-y-4 mt-8">
                   {navigation.map((item) => (
                     <Link
                       key={item.name}
                       href={item.href}
-                      className="text-slate-300 hover:text-white transition-colors text-lg"
+                      className="text-slate-700 hover:text-blue-700 transition-colors text-lg"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       {item.name}
@@ -102,9 +102,9 @@ export function Header() {
                   ))}
                   {/* User Auth for mobile */}
                   {user ? (
-                    <Button variant="outline" size="sm" className="text-slate-400 hover:text-white mt-4" onClick={handleSignOut}>Sign Out</Button>
+                    <Button variant="outline" size="sm" className="text-blue-700 hover:text-blue-900 mt-4 border-blue-200" onClick={handleSignOut}>Sign Out</Button>
                   ) : (
-                    <Button variant="outline" size="sm" className="text-slate-400 hover:text-white mt-4" onClick={handleSignIn}>Sign In</Button>
+                    <Button variant="outline" size="sm" className="text-blue-700 hover:text-blue-900 mt-4 border-blue-200" onClick={handleSignIn}>Sign In</Button>
                   )}
                 </div>
               </SheetContent>

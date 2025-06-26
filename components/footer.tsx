@@ -39,15 +39,15 @@ export function Footer() {
 
           {/* Community */}
           <div className="space-y-4">
-            <h3 className="text-white font-semibold">Community</h3>
+            <h3 className="text-blue-700 font-semibold">Community</h3>
             <div className="space-y-2">
-              <a href="#" className="block text-slate-400 hover:text-white transition-colors text-sm">
+              <a href="#" className="block text-slate-700 hover:text-blue-700 transition-colors text-sm">
                 Discord
               </a>
-              <a href="#" className="block text-slate-400 hover:text-white transition-colors text-sm">
+              <a href="#" className="block text-slate-700 hover:text-blue-700 transition-colors text-sm">
                 Twitter
               </a>
-              <a href="#" className="block text-slate-400 hover:text-white transition-colors text-sm">
+              <a href="#" className="block text-slate-700 hover:text-blue-700 transition-colors text-sm">
                 GitHub
               </a>
             </div>
@@ -55,15 +55,15 @@ export function Footer() {
 
           {/* Resources */}
           <div className="space-y-4">
-            <h3 className="text-white font-semibold">Resources</h3>
+            <h3 className="text-blue-700 font-semibold">Resources</h3>
             <div className="space-y-2">
-              <a href="#" className="block text-slate-400 hover:text-white transition-colors text-sm">
+              <a href="#" className="block text-slate-700 hover:text-blue-700 transition-colors text-sm">
                 Documentation
               </a>
-              <a href="#" className="block text-slate-400 hover:text-white transition-colors text-sm">
+              <a href="#" className="block text-slate-700 hover:text-blue-700 transition-colors text-sm">
                 API
               </a>
-              <a href="#" className="block text-slate-400 hover:text-white transition-colors text-sm">
+              <a href="#" className="block text-slate-700 hover:text-blue-700 transition-colors text-sm">
                 Whitepaper
               </a>
             </div>
@@ -71,15 +71,15 @@ export function Footer() {
         </div>
 
         <div className="border-t border-slate-800 mt-8 pt-8 flex flex-col sm:flex-row justify-between items-center">
-          <p className="text-slate-400 text-sm">© 2024 LoreChain. Building the future of collaborative storytelling.</p>
+          <p className="text-slate-700 text-sm">© 2024 LoreChain. Building the future of collaborative storytelling.</p>
           <div className="flex items-center space-x-4 mt-4 sm:mt-0">
-            <a href="#" className="text-slate-400 hover:text-white transition-colors">
+            <a href="#" className="text-slate-700 hover:text-blue-700 transition-colors">
               <Github className="h-5 w-5" />
             </a>
-            <a href="#" className="text-slate-400 hover:text-white transition-colors">
+            <a href="#" className="text-slate-700 hover:text-blue-700 transition-colors">
               <Twitter className="h-5 w-5" />
             </a>
-            <a href="#" className="text-slate-400 hover:text-white transition-colors">
+            <a href="#" className="text-slate-700 hover:text-blue-700 transition-colors">
               <Discord className="h-5 w-5" />
             </a>
           </div>
