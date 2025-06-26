@@ -53,7 +53,7 @@ export function Header() {
 
   return (
     <>
-      <header className="fixed top-0 left-0 w-full z-50 bg-[#fff9de]/80 backdrop-blur border-b border-[#f5e6b2]">
+      <header className="fixed top-0 left-0 w-full z-50 bg-[#fff9de]/10 backdrop-blur border-b border-[#f5e6b2]">
         <div className="container mx-auto px-4">
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}
@@ -79,7 +79,7 @@ export function Header() {
             <div className="hidden sm:flex items-center space-x-2">
               {user ? (
                 <>
-                  <span className="text-[#a3a380] font-mono text-sm">{user.displayName || user.email}</span>
+                  <span className="text-[#3d2c00] font-mono text-sm">{user.displayName || user.email}</span>
                   {walletAddress ? (
                     <>
                       <span className="text-[#388e3c] font-mono text-xs bg-[#fffbe9] px-2 py-1 rounded">{walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}</span>
@@ -90,7 +90,7 @@ export function Header() {
                   ) : (
                     <Button className="bg-[#ffb300] text-[#3d2c00] shadow hover:bg-[#ffd54f]" size="sm" onClick={connectWallet}>Connect Wallet</Button>
                   )}
-                  <Button variant="ghost" size="sm" onClick={handleSignOut} className="text-[#a3a380] hover:text-[#ffb300]">
+                  <Button variant="ghost" size="sm" onClick={handleSignOut} className="text-[#3d2c00] hover:text-[#ffb300]">
                     <LogOut className="h-4 w-4" />
                   </Button>
                 </>

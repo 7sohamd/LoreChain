@@ -217,7 +217,7 @@ export default function StoryMakerPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 py-8 pt-24">
       <div className="container mx-auto px-4 max-w-2xl">
         <h1 className="text-3xl font-bold mb-6 text-center text-white">Story Maker (Educational)</h1>
         <p className="mb-6 text-slate-300 text-center">
@@ -304,7 +304,7 @@ export default function StoryMakerPage() {
               }))
               .filter(chat =>
                 !search ||
-                chat.tags.some(tag => tag.toLowerCase().includes(search.toLowerCase())) ||
+                chat.tags.some((tag: string) => tag.toLowerCase().includes(search.toLowerCase())) ||
                 (chat.categories && chat.categories.some((cat: string) => cat.toLowerCase().includes(search.toLowerCase()))) ||
                 chat.title.toLowerCase().includes(search.toLowerCase())
               )

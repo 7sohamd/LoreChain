@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ArrowRight, Sparkles } from "lucide-react"
-import { CanonStatusBadge } from "./canon-status-badge"
 import { VoteButton } from "./vote-button"
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { useState } from "react"
@@ -28,9 +27,10 @@ interface LoreCardProps {
   onVote?: (type: "up" | "down") => void
   hasUpvoted?: boolean
   hasDownvoted?: boolean
+  trendingId?: string
 }
 
-export function LoreCard({ entry, onVote, hasUpvoted, hasDownvoted }: LoreCardProps) {
+export function LoreCard({ entry, onVote, hasUpvoted, hasDownvoted, trendingId }: LoreCardProps) {
   const [tipAmount, setTipAmount] = useState(1)
   const [tipLoading, setTipLoading] = useState(false)
   const [tipSuccess, setTipSuccess] = useState(false)
@@ -66,21 +66,25 @@ export function LoreCard({ entry, onVote, hasUpvoted, hasDownvoted }: LoreCardPr
   }
 
   return (
-    <Card className="bg-slate-800/50 border-slate-700 hover:border-purple-500/50 transition-colors group h-full flex flex-col">
+    <Card className="bg-[#fff9de] border border-[#f5e6b2] hover:border-[#ffb300] transition-colors group h-full flex flex-col">
+      {entry.id === trendingId && (
+        <div className="px-3 pt-3">
+          <span className="inline-block px-3 py-1 rounded-full border border-[#ffb300] text-[#ffb300] font-bold text-xs bg-[#fff9de] mb-2">TRENDING</span>
+        </div>
+      )}
       <CardHeader className="flex-shrink-0">
         <div className="flex items-start justify-between gap-2">
           <div className="space-y-2 flex-1">
-            <CardTitle className="text-white group-hover:text-purple-300 transition-colors leading-tight">
+            <CardTitle className="text-[#3d2c00] group-hover:text-[#ffb300] transition-colors leading-tight">
               {entry.title}
             </CardTitle>
             <div className="flex items-center gap-2 flex-wrap">
-              <Badge variant="secondary" className="bg-slate-700 text-slate-300">
+              <Badge variant="secondary" className="bg-[#fff9de] text-[#a3a380] border-[#f5e6b2]">
                 {entry.type}
               </Badge>
-              <CanonStatusBadge isCanon={entry.isCanon} />
               {entry.aiGenerated && (
-                <Badge variant="outline" className="border-purple-500/50 text-purple-400">
-                  <Sparkles className="mr-1 h-3 w-3" />
+                <Badge variant="outline" className="border-[#ffb300] text-[#ffb300]">
+                  <Sparkles className="mr-1 h-3 w-3 text-[#ffb300]" />
                   AI
                 </Badge>
               )}
@@ -100,12 +104,12 @@ export function LoreCard({ entry, onVote, hasUpvoted, hasDownvoted }: LoreCardPr
             />
           </div>
         )}
-        <CardDescription className="text-slate-300 mb-4 line-clamp-3 flex-1">{entry.excerpt}</CardDescription>
+        <CardDescription className="text-[#5c4a1a] mb-4 line-clamp-3 flex-1 font-mono">{entry.excerpt}</CardDescription>
 
         <div className="space-y-3 mt-auto">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-slate-400">by {entry.author}</span>
-            <span className="text-slate-400">{entry.votes} votes</span>
+            <span className="text-[#5c4a1a] font-mono">by {entry.author}</span>
+            <span className="text-[#5c4a1a] font-mono">{entry.votes} votes</span>
           </div>
 
           <div className="flex items-center justify-between gap-2">
@@ -127,14 +131,14 @@ export function LoreCard({ entry, onVote, hasUpvoted, hasDownvoted }: LoreCardPr
                 selected={!!hasDownvoted}
               />
             </div>
-            <Button asChild variant="ghost" size="sm" className="text-purple-400 hover:text-purple-300 ml-auto">
+            <Button asChild variant="outline" size="sm" className="ml-auto border-[#ffb300] text-[#3d2c00] bg-transparent hover:bg-[#ffb300] hover:text-[#3d2c00] font-bold rounded-lg shadow-sm transition-colors">
               <Link href={`/lore/${entry.id}`}>
-                View {entry.isCanon ? "Canon" : "Entry"} <ArrowRight className="ml-1 h-3 w-3" />
+                View {entry.isCanon ? "Canon" : "Entry"} <ArrowRight className="ml-1 h-3 w-3 text-[#3d2c00]" />
               </Link>
             </Button>
             <Dialog open={modalOpen} onOpenChange={setModalOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="ml-2 text-green-500 border-green-500 hover:bg-green-500/10" disabled={!canTip}>
+                <Button variant="outline" size="sm" className="ml-2 border-[#ffb300] text-[#3d2c00] bg-transparent hover:bg-[#ffb300] hover:text-[#3d2c00] font-bold rounded-lg shadow-sm transition-colors" disabled={!canTip}>
                   Tip the Writer
                 </Button>
               </DialogTrigger>
