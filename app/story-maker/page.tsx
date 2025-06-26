@@ -157,45 +157,27 @@ export default function StoryMakerPage() {
   }
 
   async function handleSpeak() {
-    if (speaking && audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-      audioRef.current = null;
+    if (speaking) {
+      window.speechSynthesis.cancel();
       setSpeaking(false);
       setIsLoadingAudio(false);
       return;
     }
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-      audioRef.current = null;
-    }
+    window.speechSynthesis.cancel();
     setIsLoadingAudio(true);
     setSpeaking(true);
     try {
-      const response = await fetch('/api/elevenlabs-tts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: story, voiceId }),
-      });
-      if (!response.ok) {
-        const error = await response.text();
-        throw new Error(error);
-      }
-      const audioBlob = await response.blob();
-      const audioUrl = URL.createObjectURL(audioBlob);
-      const audio = new Audio(audioUrl);
-      audioRef.current = audio;
-      audio.onended = () => {
-        URL.revokeObjectURL(audioUrl);
-        audioRef.current = null;
+      const utter = new window.SpeechSynthesisUtterance(story);
+      utter.onend = () => {
         setSpeaking(false);
         setIsLoadingAudio(false);
       };
-      audio.onpause = () => {
+      utter.onerror = () => {
+        setSpeaking(false);
         setIsLoadingAudio(false);
+        alert('TTS failed.');
       };
-      await audio.play();
+      window.speechSynthesis.speak(utter);
       setIsLoadingAudio(false);
     } catch (error) {
       setSpeaking(false);
@@ -239,17 +221,6 @@ export default function StoryMakerPage() {
               <ReactMarkdown>{story}</ReactMarkdown>
             </div>
             <div className="flex items-center gap-2 mb-2">
-              <label htmlFor="voice-select" className="text-slate-300 text-sm mr-2">Voice:</label>
-              <select
-                id="voice-select"
-                value={voiceId}
-                onChange={e => setVoiceId(e.target.value)}
-                className="bg-slate-700 text-slate-200 rounded px-2 py-1 border border-slate-600 focus:outline-none"
-              >
-                {ELEVENLABS_VOICES.map(v => (
-                  <option key={v.id} value={v.id}>{v.name}</option>
-                ))}
-              </select>
               <Button
                 onClick={handleSpeak}
                 variant="outline"

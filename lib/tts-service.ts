@@ -87,4 +87,30 @@ export class TTSService {
   }
 }
 
-export const ttsService = TTSService.getInstance(); 
+export const ttsService = TTSService.getInstance();
+
+// Optionally, add a helper to call the /api/tts endpoint
+export async function getSpeechFromText(text: string): Promise<Blob | null> {
+  try {
+    const res = await fetch("/api/tts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text }),
+    });
+    if (!res.ok) throw new Error("TTS API error");
+    return await res.blob();
+  } catch (err) {
+    console.error("TTS fetch error:", err);
+    return null;
+  }
+}
+
+// Optionally, add a helper to use the browser's speechSynthesis API
+export function speakText(text: string) {
+  if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+    const utter = new window.SpeechSynthesisUtterance(text);
+    window.speechSynthesis.speak(utter);
+  } else {
+    console.error('speechSynthesis not supported in this environment.');
+  }
+} 
