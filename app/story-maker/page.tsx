@@ -9,7 +9,6 @@ import { Volume2, Loader2, Square } from "lucide-react";
 import { db, auth, provider } from "@/lib/firebase";
 import { collection, addDoc, serverTimestamp, getDocs, orderBy, query, where } from "firebase/firestore";
 import { signInWithPopup, onAuthStateChanged } from "firebase/auth";
-import { Badge } from "@/components/ui/badge";
 
 const ELEVENLABS_VOICES = [
   { id: "JBFqnCBsd6RMkjVDRZzb", name: "Rachel (English)" },
@@ -17,55 +16,6 @@ const ELEVENLABS_VOICES = [
   { id: "AZnzlk1XvdvUeBnXmlld", name: "Antoni (English)" },
   { id: "EXAVITQu4vr4xnSDxMaL", name: "Elli (English)" },
 ];
-
-const semanticTagMap: Record<string, string[]> = {
-  "binary tree": ["DataStructures", "Trees", "Algorithms"],
-  "array": ["DataStructures", "Arrays"],
-  "linked list": ["DataStructures", "LinkedLists"],
-  "stack": ["DataStructures", "Stack"],
-  "queue": ["DataStructures", "Queue"],
-  "c++": ["C++", "Programming"],
-  "python": ["Python", "Programming"],
-  "sorting": ["Algorithms", "Sorting"],
-  "searching": ["Algorithms", "Searching"],
-  "graph": ["DataStructures", "Graphs", "Algorithms"],
-  "recursion": ["Algorithms", "Recursion"],
-  // Add more as needed
-};
-
-function extractTitleAndExcerpt(story: string, input: string) {
-  // Use input as title if it looks like a topic, else first line of story
-  let title = input.trim();
-  if (title.length > 60 || title.match(/^https?:\/\//)) {
-    // If input is a URL or too long, use first line of story
-    title = story.split("\n")[0].slice(0, 60);
-  }
-  const excerpt = story.replace(/\n/g, " ").slice(0, 120) + (story.length > 120 ? "..." : "");
-  return { title, excerpt };
-}
-
-function extractTags(input: string): string[] {
-  // Lowercase input for matching
-  const lowerInput = input.toLowerCase();
-  let tags: string[] = [];
-  // Add mapped tags if any match
-  for (const key in semanticTagMap) {
-    if (lowerInput.includes(key)) {
-      tags = tags.concat(semanticTagMap[key]);
-    }
-  }
-  // Add keyword tags (as before)
-  const stopwords = ["the","and","or","in","on","at","a","an","of","for","to","with","by","from","is","are","was","were","as","that","this","it","be","but","if","then","so","do","does","did","has","have","had","will","would","can","could","should","may","might","must","not","just","about","into","over","after","before","between","under","above","more","most","some","such","no","nor","only","own","same","than","too","very","s","t","ll","d","m","re","ve","y","ain","aren","couldn","didn","doesn","hadn","hasn","haven","isn","ma","mightn","mustn","needn","shan","shouldn","wasn","weren","won","wouldn"];
-  const keywordTags = Array.from(new Set(input
-    .replace(/[^\w\s+#]/g, " ")
-    .split(/\s+/)
-    .map(w => w.trim().replace(/^#+/, ""))
-    .filter(w => w.length > 1 && !stopwords.includes(w.toLowerCase()))
-    .map(w => w[0].toUpperCase() + w.slice(1))
-  ));
-  // Merge and dedupe
-  return Array.from(new Set([...tags, ...keywordTags]));
-}
 
 export default function StoryMakerPage() {
   const [input, setInput] = useState("");
@@ -79,8 +29,6 @@ export default function StoryMakerPage() {
   const [pastChats, setPastChats] = useState<any[]>([]);
   const [user, setUser] = useState<any>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [search, setSearch] = useState("");
-  const [expandedChatId, setExpandedChatId] = useState<string | null>(null);
 
   // Auth state
   useEffect(() => {
@@ -245,61 +193,26 @@ export default function StoryMakerPage() {
           </div>
         )}
         {/* Past Chats Section */}
-        <div className="mt-12">
-          <h2 className="text-2xl font-bold mb-4 text-white">Past Chats</h2>
-          <Input
-            placeholder="Search by keyword (e.g. C++, Arrays, DataStructures)"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="mb-4 bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
-          />
-          <div className="space-y-6">
-            {pastChats
-              .map(chat => ({
-                ...chat,
-                tags: extractTags(chat.input),
-                ...extractTitleAndExcerpt(chat.story, chat.input),
-              }))
-              .filter(chat =>
-                !search ||
-                chat.tags.some(tag => tag.toLowerCase().includes(search.toLowerCase())) ||
-                chat.title.toLowerCase().includes(search.toLowerCase())
-              )
-              .map((chat) => (
+        {pastChats.length > 0 && (
+          <div className="mt-12">
+            <h2 className="text-2xl font-bold mb-4 text-white">Past Chats</h2>
+            <div className="space-y-6">
+              {pastChats.map((chat) => (
                 <div key={chat.id} className="bg-slate-800/60 p-4 rounded-xl shadow border border-slate-700">
                   <div className="text-slate-400 text-xs mb-1">
                     {chat.createdAt?.toDate ? chat.createdAt.toDate().toLocaleString() : ""}
                   </div>
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {(chat.tags as string[]).map((tag: string) => (
-                      <Badge key={tag} className="bg-purple-700/30 text-purple-200">{tag}</Badge>
-                    ))}
-                  </div>
-                  <div className="text-slate-200 font-bold text-lg mb-1">{chat.title}</div>
                   <div className="text-slate-300 text-sm mb-2">
                     <b>Input:</b> {chat.input}
                   </div>
-                  {expandedChatId === chat.id ? (
-                    <div className="prose prose-invert max-w-none mb-2">
-                      <ReactMarkdown>{chat.story}</ReactMarkdown>
-                    </div>
-                  ) : (
-                    <div className="text-slate-400 text-sm mb-2">
-                      {chat.excerpt}
-                    </div>
-                  )}
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="border-slate-600 text-purple-300 hover:bg-slate-700"
-                    onClick={() => setExpandedChatId(expandedChatId === chat.id ? null : chat.id)}
-                  >
-                    {expandedChatId === chat.id ? "Hide full chat" : "See full chat"}
-                  </Button>
+                  <div className="prose prose-invert max-w-none">
+                    <ReactMarkdown>{chat.story}</ReactMarkdown>
+                  </div>
                 </div>
               ))}
+            </div>
           </div>
-        </div>
+        )}
         </>
         )}
       </div>
