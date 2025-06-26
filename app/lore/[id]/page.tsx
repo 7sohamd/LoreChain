@@ -14,8 +14,10 @@ import {
 } from "firebase/firestore"
 import { auth, db } from "@/lib/firebase"
 import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth"
+import { useParams } from "next/navigation"
 
-export default function EntryPage({ params }: { params: any }) {
+export default function EntryPage() {
+  const params = useParams();
   const { id } = params;
   const [story, setStory] = useState<any>(null)
   const [user, setUser] = useState<FirebaseUser | null>(null)
