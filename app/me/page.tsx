@@ -11,6 +11,7 @@ import { CanonStatusBadge } from "@/components/canon-status-badge"
 import { auth, db } from "@/lib/firebase"
 import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth"
 import { collection, query, where, getDocs } from "firebase/firestore"
+import { Avatar } from "@/components/ui/avatar"
 
 export default function MyLorePage() {
   const [user, setUser] = useState<FirebaseUser | null>(null)
@@ -61,13 +62,23 @@ export default function MyLorePage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div>
-                  <p className="text-sm text-slate-400">Email</p>
-                  <p className="text-white font-mono text-sm break-all">user@email.com</p>
+                <div className="flex flex-col items-center gap-2 mb-4">
+                  {user.photoURL ? (
+                    <img
+                      src={user.photoURL}
+                      alt={user.displayName || user.email || "User"}
+                      className="w-20 h-20 rounded-full object-cover border-4 border-purple-500 shadow"
+                    />
+                  ) : (
+                    <div className="w-20 h-20 rounded-full bg-slate-700 flex items-center justify-center text-3xl text-white font-bold">
+                      {user.displayName ? user.displayName[0] : (user.email ? user.email[0] : "U")}
+                    </div>
+                  )}
+                  <div className="text-lg font-bold text-white">{user.displayName || user.email}</div>
                 </div>
                 <div>
-                  <p className="text-sm text-slate-400">Member Since</p>
-                  <p className="text-white">2024-01-01</p>
+                  <p className="text-sm text-slate-400">Email</p>
+                  <p className="text-white font-mono text-sm break-all">{user.email}</p>
                 </div>
                 <Button
                   variant="outline"
