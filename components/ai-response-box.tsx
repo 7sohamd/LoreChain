@@ -2,9 +2,16 @@
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Sparkles, Copy, Plus, Volume2, VolumeX } from "lucide-react"
-import { useState } from "react"
-import { ttsService } from "@/lib/tts-service"
+import { Sparkles, Copy, Plus, Volume2, Loader2, Square } from "lucide-react"
+import { useRef, useState } from "react"
+
+const ELEVENLABS_VOICES = [
+  { id: "JBFqnCBsd6RMkjVDRZzb", name: "Rachel (English)" },
+  { id: "21m00Tcm4TlvDq8ikWAM", name: "Adam (English)" },
+  { id: "AZnzlk1XvdvUeBnXmlld", name: "Antoni (English)" },
+  { id: "EXAVITQu4vr4xnSDxMaL", name: "Elli (English)" },
+  // Add more voices as desired
+]
 
 interface AIResponseBoxProps {
   suggestions: string[]
@@ -15,7 +22,9 @@ interface AIResponseBoxProps {
 export function AIResponseBox({ suggestions, isLoading, onSelectSuggestion }: AIResponseBoxProps) {
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
   const [speakingIndex, setSpeakingIndex] = useState<number | null>(null)
-  const [isSpeaking, setIsSpeaking] = useState(false)
+  const [isLoadingAudio, setIsLoadingAudio] = useState(false)
+  const [voiceId, setVoiceId] = useState(ELEVENLABS_VOICES[0].id)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
 
   const handleCopy = async (text: string, index: number) => {
     await navigator.clipboard.writeText(text)
@@ -24,33 +33,50 @@ export function AIResponseBox({ suggestions, isLoading, onSelectSuggestion }: AI
   }
 
   const handleSpeak = async (text: string, index: number) => {
+    if (speakingIndex === index && audioRef.current) {
+      audioRef.current.pause()
+      audioRef.current.currentTime = 0
+      audioRef.current = null
+      setSpeakingIndex(null)
+      setIsLoadingAudio(false)
+      return
+    }
+    if (audioRef.current) {
+      audioRef.current.pause()
+      audioRef.current.currentTime = 0
+      audioRef.current = null
+    }
+    setIsLoadingAudio(true)
+    setSpeakingIndex(index)
     try {
-      if (isSpeaking && speakingIndex === index) {
-        // Stop speaking if already speaking this text
-        ttsService.stop()
-        setIsSpeaking(false)
-        setSpeakingIndex(null)
-        return
+      const response = await fetch('/api/elevenlabs-tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, voiceId }),
+      })
+      if (!response.ok) {
+        const error = await response.text()
+        throw new Error(error)
       }
-
-      // Stop any current speech
-      ttsService.stop()
-      setIsSpeaking(false)
-      setSpeakingIndex(null)
-
-      // Start speaking the new text
-      setIsSpeaking(true)
-      setSpeakingIndex(index)
-      
-      await ttsService.speak(text)
-      
-      // Reset state when speech ends
-      setIsSpeaking(false)
-      setSpeakingIndex(null)
+      const audioBlob = await response.blob()
+      const audioUrl = URL.createObjectURL(audioBlob)
+      const audio = new Audio(audioUrl)
+      audioRef.current = audio
+      audio.onended = () => {
+        URL.revokeObjectURL(audioUrl)
+        audioRef.current = null
+        setSpeakingIndex(null)
+        setIsLoadingAudio(false)
+      }
+      audio.onpause = () => {
+        setIsLoadingAudio(false)
+      }
+      await audio.play()
+      setIsLoadingAudio(false)
     } catch (error) {
-      console.error('Error speaking text:', error)
-      setIsSpeaking(false)
       setSpeakingIndex(null)
+      setIsLoadingAudio(false)
+      alert('TTS failed: ' + (error as Error).message)
     }
   }
 
@@ -87,6 +113,19 @@ export function AIResponseBox({ suggestions, isLoading, onSelectSuggestion }: AI
         <CardDescription className="text-slate-300">
           Select a suggestion to add to your lore, or use them as inspiration
         </CardDescription>
+        <div className="mt-4">
+          <label htmlFor="voice-select" className="text-slate-300 text-sm mr-2">Voice:</label>
+          <select
+            id="voice-select"
+            value={voiceId}
+            onChange={e => setVoiceId(e.target.value)}
+            className="bg-slate-700 text-slate-200 rounded px-2 py-1 border border-slate-600 focus:outline-none"
+          >
+            {ELEVENLABS_VOICES.map(v => (
+              <option key={v.id} value={v.id}>{v.name}</option>
+            ))}
+          </select>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -109,17 +148,21 @@ export function AIResponseBox({ suggestions, isLoading, onSelectSuggestion }: AI
                   onClick={() => handleSpeak(suggestion, index)}
                   variant="outline"
                   size="sm"
-                  className={`border-slate-600 text-slate-300 hover:bg-slate-600 ${
-                    speakingIndex === index && isSpeaking ? 'bg-purple-600 border-purple-500 text-white' : ''
-                  }`}
-                  disabled={isSpeaking && speakingIndex !== index}
+                  className="border-slate-600 text-slate-300 hover:bg-slate-600"
+                  disabled={isLoadingAudio && speakingIndex !== index}
                 >
-                  {speakingIndex === index && isSpeaking ? (
-                    <VolumeX className="mr-2 h-3 w-3" />
+                  {isLoadingAudio && speakingIndex === index ? (
+                    <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                  ) : speakingIndex === index ? (
+                    <Square className="mr-2 h-3 w-3" />
                   ) : (
                     <Volume2 className="mr-2 h-3 w-3" />
                   )}
-                  {speakingIndex === index && isSpeaking ? "Stop" : "Speak"}
+                  {isLoadingAudio && speakingIndex === index
+                    ? "Loading..."
+                    : speakingIndex === index
+                    ? "Stop"
+                    : "Speak"}
                 </Button>
                 <Button
                   onClick={() => handleCopy(suggestion, index)}
