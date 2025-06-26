@@ -13,41 +13,6 @@ import { auth, db } from "@/lib/firebase"
 import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth"
 import { collection, addDoc, Timestamp } from "firebase/firestore"
 
-const IMGBB_API_KEY = "de6da56cc64d7ee807a246ac4c1d4492";
-
-function toBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve((reader.result as string).split(',')[1]);
-    reader.onerror = error => reject(error);
-  });
-}
-
-async function uploadToImgBB(file: File): Promise<string> {
-  const base64 = await toBase64(file);
-  const formData = new FormData();
-  formData.append("key", IMGBB_API_KEY);
-  formData.append("image", base64);
-  const res = await fetch("https://api.imgbb.com/1/upload", {
-    method: "POST",
-    body: formData,
-  });
-  const text = await res.text();
-  console.log("Raw ImgBB response:", text);
-  let data;
-  try {
-    data = JSON.parse(text);
-  } catch {
-    throw new Error("ImgBB response is not valid JSON");
-  }
-  if (!data.success) {
-    console.error("ImgBB upload failed:", data);
-    throw new Error(data.error?.message || "ImgBB upload failed");
-  }
-  return data.data.url;
-}
-
 export default function WritePage() {
   const [title, setTitle] = useState("")
   const [content, setContent] = useState("")
@@ -58,8 +23,6 @@ export default function WritePage() {
   const [showAISuggestions, setShowAISuggestions] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
   const [aiSuggestions, setAISuggestions] = useState<string[]>([])
-  const [coverFile, setCoverFile] = useState<File | null>(null)
-  const [coverPreview, setCoverPreview] = useState<string | null>(null)
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
@@ -68,16 +31,6 @@ export default function WritePage() {
     })
     return () => unsubscribe()
   }, [])
-
-  useEffect(() => {
-    if (coverFile) {
-      const url = URL.createObjectURL(coverFile)
-      setCoverPreview(url)
-      return () => URL.revokeObjectURL(url)
-    } else {
-      setCoverPreview(null)
-    }
-  }, [coverFile])
 
   const handleGetAISuggestions = async () => {
     setIsGenerating(true)
@@ -102,18 +55,11 @@ export default function WritePage() {
       return
     }
     setIsSubmitting(true)
-    let coverUrl = ""
     try {
-      // Upload cover image to ImgBB if present
-      if (coverFile) {
-        coverUrl = await uploadToImgBB(coverFile)
-      }
-      // Save story with coverUrl
       await addDoc(collection(db, "stories"), {
         title,
         content,
         category,
-        coverUrl,
         authorId: user.uid,
         authorName: user.displayName || user.email,
         createdAt: Timestamp.now(),
@@ -123,10 +69,10 @@ export default function WritePage() {
         parentMainId: null,
       })
       alert("Story submitted successfully!")
+      // Clear the form
       setTitle("")
       setContent("")
       setCategory("")
-      setCoverFile(null)
     } catch (err) {
       console.error(err)
       alert("Failed to submit story.")
@@ -168,30 +114,6 @@ export default function WritePage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Cover Image Upload */}
-                <div className="space-y-2">
-                  <Label htmlFor="cover" className="text-white">
-                    Cover Image (optional)
-                  </Label>
-                  <Input
-                    id="cover"
-                    type="file"
-                    accept="image/*"
-                    onChange={e => {
-                      const file = e.target.files?.[0]
-                      if (file) setCoverFile(file)
-                    }}
-                    className="bg-slate-700 border-slate-600 text-white"
-                  />
-                  {coverPreview && (
-                    <img
-                      src={coverPreview}
-                      alt="Cover Preview"
-                      className="mt-2 rounded-lg max-h-48 border border-slate-600"
-                    />
-                  )}
-                </div>
-
                 <div className="space-y-2">
                   <Label htmlFor="title" className="text-white">
                     Title

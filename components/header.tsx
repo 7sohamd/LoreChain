@@ -40,7 +40,6 @@ export function Header() {
     { name: "Lore", href: "/lore" },
     { name: "My Lore", href: "/me" },
     { name: "Story Maker", href: "/story-maker" },
-    { name: "Podcast", href: "/podcast" },
   ]
 
   return (
