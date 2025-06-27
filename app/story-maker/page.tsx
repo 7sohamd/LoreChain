@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import ReactMarkdown from "react-markdown";
-import { Volume2, Loader2, Square, Mic } from "lucide-react";
+import { Volume2, Loader2, Square, Mic, Image as ImageIcon } from "lucide-react";
 import { db, auth, provider } from "@/lib/firebase";
 import { collection, addDoc, serverTimestamp, getDocs, orderBy, query, where } from "firebase/firestore";
 import { signInWithPopup, onAuthStateChanged } from "firebase/auth";
@@ -94,6 +94,7 @@ export default function StoryMakerPage() {
   const [search, setSearch] = useState("");
   const [expandedChatId, setExpandedChatId] = useState<string | null>(null);
   const [listening, setListening] = useState(false);
+  const [imageLoading, setImageLoading] = useState(false);
   const recognitionRef = useRef<any>(null);
 
   // Auth state
@@ -261,6 +262,30 @@ export default function StoryMakerPage() {
     recognition.start();
   };
 
+  // Image search handler
+  const handleImageSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImageLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
+      const res = await fetch("/api/image-caption", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.caption) {
+        setInput(data.caption);
+      } else {
+        alert(data.error || "Could not extract text from image.");
+      }
+    } catch (err) {
+      alert("Image-to-text failed. Try another image.");
+    }
+    setImageLoading(false);
+  };
+
   return (
     <div className="min-h-screen bg-[#fff9de] py-8 pt-24">
       <div className="container mx-auto px-4 max-w-2xl">
@@ -282,17 +307,21 @@ export default function StoryMakerPage() {
                 placeholder="Paste YouTube URL or enter a topic (e.g. Photosynthesis, Binary Search Tree)"
                 value={input}
                 onChange={e => setInput(e.target.value)}
-                className="bg-[#fff9de] border-2 border-[#ffb300] text-[#3d2c00] placeholder:text-[#a3a380] rounded-lg shadow-md focus:border-[#3d2c00] focus:ring-2 focus:ring-[#ffb300] transition-all text-base py-3 px-4 pr-12"
+                className="bg-[#fff9de] border-2 border-[#ffb300] text-[#3d2c00] placeholder:text-[#a3a380] rounded-lg shadow-md focus:border-[#3d2c00] focus:ring-2 focus:ring-[#ffb300] transition-all text-base py-3 px-4 pr-24"
                 required
               />
               <button
                 type="button"
                 onClick={handleVoiceSearch}
-                className={`absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full border-none bg-transparent ${listening ? 'bg-[#ffb300] text-white animate-pulse' : 'text-[#ffb300] hover:bg-[#fff9de]'}`}
+                className={`absolute right-12 top-1/2 -translate-y-1/2 p-2 rounded-full border-none bg-transparent ${listening ? 'bg-[#ffb300] text-white animate-pulse' : 'text-[#ffb300] hover:bg-[#fff9de]'}`}
                 aria-label={listening ? "Listening..." : "Start voice input"}
               >
                 <Mic className="h-6 w-6" />
               </button>
+              <label className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full border-none bg-transparent cursor-pointer text-[#ffb300] hover:bg-[#fff9de]">
+                <input type="file" accept="image/*" onChange={handleImageSearch} className="hidden" />
+                {imageLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : <ImageIcon className="h-6 w-6" />}
+              </label>
             </div>
             <Button type="submit" className="w-full bg-[#ffb300] text-[#3d2c00] font-bold shadow border border-[#f5e6b2] hover:bg-[#ffd54f] hover:text-[#3d2c00] rounded-lg text-lg py-3 transition-all" disabled={loading || !input}>
               {loading ? "Generating..." : "Generate Story"}
