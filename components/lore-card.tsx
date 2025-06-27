@@ -7,6 +7,7 @@ import { CanonStatusBadge } from "./canon-status-badge"
 import { VoteButton } from "./vote-button"
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { useState } from "react"
+import { ethers } from "ethers"
 
 interface LoreEntry {
   id: string
@@ -30,37 +31,52 @@ interface LoreCardProps {
   hasDownvoted?: boolean
 }
 
+const USDC_ADDRESS = "0x5425890298aed601595a70AB815c96711a31Bc65"
+const USDC_ABI = [
+  "function transfer(address to, uint amount) public returns (bool)"
+]
+
 export function LoreCard({ entry, onVote, hasUpvoted, hasDownvoted }: LoreCardProps) {
   const [tipAmount, setTipAmount] = useState(1)
   const [tipLoading, setTipLoading] = useState(false)
   const [tipSuccess, setTipSuccess] = useState(false)
   const [tipError, setTipError] = useState<string | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
+  const [token, setToken] = useState("USDC")
+  const [txHash, setTxHash] = useState("")
   const canTip = !!entry.authorWallet
 
   const handleTip = async () => {
     setTipLoading(true)
     setTipError(null)
     setTipSuccess(false)
+    setTxHash("")
     try {
-      const res = await fetch("/api/tip", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ recipientWallet: entry.authorWallet, amount: tipAmount })
-      })
-      if (res.status === 200) {
-        setTipSuccess(true)
-        setTimeout(() => {
-          setModalOpen(false)
-          setTipSuccess(false)
-        }, 1500)
-      } else if (res.status === 402) {
-        setTipError("Payment required. Please complete payment.")
-      } else {
-        setTipError("Failed to send tip.")
+      if (!window.ethereum) throw new Error("Please install MetaMask!")
+      await window.ethereum.request({ method: "eth_requestAccounts" })
+      const provider = new ethers.BrowserProvider(window.ethereum)
+      const signer = await provider.getSigner()
+      let tx
+      if (token === "USDC") {
+        const usdc = new ethers.Contract(USDC_ADDRESS, USDC_ABI, signer)
+        const amountInWei = ethers.parseUnits(tipAmount.toString(), 6)
+        tx = await usdc.transfer(entry.authorWallet, amountInWei)
+      } else if (token === "AVAX") {
+        const amountInWei = ethers.parseEther(tipAmount.toString())
+        tx = await signer.sendTransaction({
+          to: entry.authorWallet,
+          value: amountInWei
+        })
       }
-    } catch (err) {
-      setTipError("Error sending tip.")
+      setTipSuccess(true)
+      setTxHash(tx.hash)
+      setTimeout(() => {
+        setModalOpen(false)
+        setTipSuccess(false)
+        setTxHash("")
+      }, 5000)
+    } catch (err: any) {
+      setTipError("Payment failed: " + (err.message || err))
     }
     setTipLoading(false)
   }
@@ -143,7 +159,7 @@ export function LoreCard({ entry, onVote, hasUpvoted, hasDownvoted }: LoreCardPr
                   <DialogTitle>Tip the Writer</DialogTitle>
                 </DialogHeader>
                 <div className="flex flex-col gap-4">
-                  <label className="text-sm">Enter tip amount (USDC):</label>
+                  <label className="text-sm">Enter tip amount:</label>
                   <input
                     type="number"
                     min={0.01}
@@ -153,6 +169,11 @@ export function LoreCard({ entry, onVote, hasUpvoted, hasDownvoted }: LoreCardPr
                     className="border rounded px-2 py-1 bg-slate-900 text-white"
                     disabled={tipLoading}
                   />
+                  <label className="text-sm">Token:</label>
+                  <select value={token} onChange={e => setToken(e.target.value)} disabled={tipLoading} className="border rounded px-2 py-1 bg-slate-900 text-white">
+                    <option value="USDC">USDC</option>
+                    <option value="AVAX">AVAX</option>
+                  </select>
                   <div className="text-xs text-slate-400">
                     Recipient Wallet: {entry.authorWallet ? (
                       <span className="text-green-400 font-mono">{entry.authorWallet.slice(0, 6)}...{entry.authorWallet.slice(-4)}</span>
@@ -162,6 +183,11 @@ export function LoreCard({ entry, onVote, hasUpvoted, hasDownvoted }: LoreCardPr
                   </div>
                   {tipError && <div className="text-red-500 text-xs">{tipError}</div>}
                   {tipSuccess && <div className="text-green-500 text-xs">Tip sent successfully!</div>}
+                  {txHash && (
+                    <div className="text-xs text-blue-400">
+                      Transaction: <a href={`https://testnet.snowtrace.io/tx/${txHash}`} target="_blank" rel="noopener noreferrer" className="underline">{txHash.slice(0, 10)}...{txHash.slice(-6)}</a>
+                    </div>
+                  )}
                 </div>
                 <DialogFooter>
                   <Button variant="default" className="w-full mt-2" disabled={!canTip || tipLoading} onClick={handleTip}>
