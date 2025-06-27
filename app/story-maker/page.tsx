@@ -191,7 +191,7 @@ export default function StoryMakerPage() {
       const response = await fetch('/api/elevenlabs-tts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: story, voiceId }),
+        body: JSON.stringify({ text: story.replace(/\n+/g, ' '), voiceId }),
       });
       if (!response.ok) {
         const error = await response.text();
