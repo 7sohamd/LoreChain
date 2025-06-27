@@ -17,6 +17,7 @@ export default function LorePage() {
   const [loading, setLoading] = useState(true)
   const [wallets, setWallets] = useState<{ [uid: string]: string | null }>({})
   const [search, setSearch] = useState("")
+  const [activeTab, setActiveTab] = useState('all')
 
   // Auth state
   useEffect(() => {
@@ -99,37 +100,36 @@ export default function LorePage() {
   const trendingStoryId = Object.entries(continuationCounts).sort((a, b) => b[1] - a[1])[0]?.[0];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 py-8">
+    <div className="min-h-screen bg-[#fff9de] py-8 pt-24">
       <div className="container mx-auto px-4">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent mb-4">
+          <h1 className="text-4xl font-bold text-[#3d2c00] mb-4">
             Lore Archive
           </h1>
-          <p className="text-slate-300 text-lg">Explore the ever-growing universe of collaborative storytelling</p>
+          <p className="text-[#5c4a1a] text-lg font-mono">Explore the ever-growing universe of collaborative storytelling</p>
         </div>
 
-        {/* Search and filter UI (not implemented, just UI) */}
         <div className="mb-8 space-y-4">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[#ffb300]" />
               <Input
                 placeholder="Search lore entries..."
-                className="pl-10 bg-slate-800 border-slate-700 text-white placeholder:text-slate-400"
+                className="pl-12 py-3 bg-[#fff9de] border-2 border-[#ffb300] text-[#3d2c00] placeholder:text-[#a3a380] rounded-lg shadow-md focus:border-[#3d2c00] focus:ring-2 focus:ring-[#ffb300] transition-all text-base"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
               />
             </div>
           </div>
-          <Tabs className="w-full">
-            <TabsList className="bg-slate-800 border-slate-700">
-              <TabsTrigger value="all" className="data-[state=active]:bg-purple-600">
+          <Tabs className="w-full" value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="bg-[#fff9de] border-[#f5e6b2]">
+              <TabsTrigger value="all" className="text-[#3d2c00] data-[state=active]:bg-[#ffb300] data-[state=active]:text-[#3d2c00]">
                 All ({filteredLores.length})
               </TabsTrigger>
-              <TabsTrigger value="canon" className="data-[state=active]:bg-green-600">
-                Canon ({filteredLores.filter((e) => e.isMain).length})
+              <TabsTrigger value="trending" className="text-[#3d2c00] data-[state=active]:bg-[#ffb300] data-[state=active]:text-[#3d2c00]">
+                Trending
               </TabsTrigger>
-              <TabsTrigger value="pending" className="data-[state=active]:bg-yellow-600">
+              <TabsTrigger value="pending" className="text-[#3d2c00] data-[state=active]:bg-yellow-600">
                 Pending ({filteredLores.filter((e) => !e.isMain).length})
               </TabsTrigger>
             </TabsList>
@@ -137,7 +137,11 @@ export default function LorePage() {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredLores.map((entry) => {
+          {(activeTab === 'all' ? filteredLores :
+            activeTab === 'trending' ? filteredLores.filter(e => e.id === trendingStoryId) :
+            activeTab === 'pending' ? filteredLores.filter(e => !e.isMain) :
+            filteredLores
+          ).map((entry) => {
             const hasUpvoted = !!user && entry.upvotes?.includes(user.uid)
             const hasDownvoted = !!user && entry.downvotes?.includes(user.uid)
             return (
@@ -149,7 +153,7 @@ export default function LorePage() {
                     excerpt: entry.content?.slice(0, 120) + (entry.content?.length > 120 ? "..." : ""),
                     author: entry.authorName,
                     type: entry.category,
-                    isCanon: entry.isMain,
+                    isCanon: false,
                     votes: Math.max((entry.upvotes?.length || 0) - (entry.downvotes?.length || 0), 0),
                     aiGenerated: false,
                     authorWallet: entry.authorId ? wallets[entry.authorId] : null,
@@ -162,7 +166,7 @@ export default function LorePage() {
                   hasDownvoted={hasDownvoted}
                 />
                 {entry.id === trendingStoryId && (
-                  <span className="ml-2 text-pink-400 font-bold">TRENDING</span>
+                  <span className="ml-2 px-2 py-1 rounded-full border border-[#ffb300] text-[#ffb300] font-bold text-xs bg-[#fff9de]">TRENDING</span>
                 )}
               </div>
             )
@@ -171,8 +175,8 @@ export default function LorePage() {
 
         {filteredLores.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-slate-400 text-lg">No lore entries yet.</p>
-            <Button asChild className="mt-4 bg-purple-600 hover:bg-purple-700">
+            <p className="text-[#5c4a1a] text-lg font-mono">No lore entries yet.</p>
+            <Button asChild className="mt-4 bg-[#ffb300] text-[#3d2c00] hover:bg-[#ffd54f] font-bold shadow border border-[#f5e6b2]">
               <a href="/write">Create New Lore</a>
             </Button>
           </div>

@@ -12,6 +12,7 @@ import { AIResponseBox } from "@/components/ai-response-box"
 import { auth, db } from "@/lib/firebase"
 import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth"
 import { collection, addDoc, Timestamp } from "firebase/firestore"
+import { cn } from "@/lib/utils"
 const IMGBB_API_KEY = process.env.NEXT_PUBLIC_IMGBB_API_KEY;
 
 export default function WritePage() {
@@ -118,32 +119,44 @@ export default function WritePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 py-8">
-      <div className="container mx-auto px-4 max-w-4xl">
+    <div className="relative min-h-screen py-8 pt-24" style={{ background: '#fff9de' }}>
+      {/* Dot Background */}
+      <div
+        className={cn(
+          "absolute inset-0",
+          "[background-size:12px_12px]",
+          "[background-image:radial-gradient(#3d2c00_1px,transparent_1px)]"
+        )} />
+      {/* Radial gradient for the container to give a faded look */}
+      <div
+        className="pointer-events-none absolute inset-0 flex items-center justify-center [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]"
+        style={{ background: '#fff9de' }}></div>
+      
+      <div className="container mx-auto px-4 max-w-4xl relative z-10">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent mb-4">
+          <h1 className="text-4xl font-bold text-[#3d2c00] mb-4">
             Write New Lore
           </h1>
-          <p className="text-slate-300 text-lg">
+          <p className="text-[#5c4a1a] text-lg font-mono">
             Contribute to the ever-expanding universe. Use AI assistance to enhance your creativity.
           </p>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
-            <Card className="bg-slate-800/50 border-slate-700">
+            <Card className="bg-white border border-[#f5e6b2]">
               <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
-                  <Lightbulb className="h-5 w-5 text-yellow-400" />
+                <CardTitle className="text-[#3d2c00] flex items-center gap-2">
+                  <Lightbulb className="h-5 w-5 text-[#ffb300]" />
                   Lore Entry
                 </CardTitle>
-                <CardDescription className="text-slate-300">
+                <CardDescription className="text-[#5c4a1a] font-mono">
                   Create compelling lore that expands the universe
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="title" className="text-white">
+                  <Label htmlFor="title" className="text-[#3d2c00]">
                     Title
                   </Label>
                   <Input
@@ -151,19 +164,19 @@ export default function WritePage() {
                     placeholder="Enter a compelling title for your lore..."
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
+                    className="bg-[#fff9de] border-[#f5e6b2] text-[#3d2c00] placeholder:text-[#a3a380]"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="category" className="text-white">
+                  <Label htmlFor="category" className="text-[#3d2c00]">
                     Category
                   </Label>
                   <Select value={category} onValueChange={setCategory}>
-                    <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                      <SelectValue placeholder="Select a category" />
+                    <SelectTrigger className="bg-[#fff9de] border-[#f5e6b2] text-[#3d2c00]">
+                      <SelectValue placeholder="Select a category" className="text-[#3d2c00]" />
                     </SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-700">
+                    <SelectContent className="bg-white border-[#f5e6b2]">
                       <SelectItem value="mystery/crime">Mystery/Crime</SelectItem>
                       <SelectItem value="fantasy">Fantasy</SelectItem>
                       <SelectItem value="science fiction">Science Fiction</SelectItem>
@@ -177,7 +190,7 @@ export default function WritePage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="content" className="text-white">
+                  <Label htmlFor="content" className="text-[#3d2c00]">
                     Lore Content
                   </Label>
                   <Textarea
@@ -185,24 +198,24 @@ export default function WritePage() {
                     placeholder="Write your lore here... Describe the characters, places, events, or objects that will become part of the canon universe."
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
-                    className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 min-h-[300px] resize-none"
+                    className="bg-[#fff9de] border-[#f5e6b2] text-[#3d2c00] placeholder:text-[#a3a380] min-h-[300px] resize-none"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-white">Attach Image (optional)</Label>
+                  <Label className="text-[#3d2c00]">Attach Image (optional)</Label>
                   <input
                     type="file"
                     accept="image/*"
                     onChange={handleImageUpload}
-                    className="block w-full text-white bg-slate-700 border border-slate-600 rounded px-3 py-2"
+                    className="block w-full text-[#3d2c00] bg-[#fff9de] border border-[#f5e6b2] rounded px-3 py-2"
                     disabled={imageUploading}
                   />
-                  {imageUploading && <div className="text-slate-400 text-sm">Uploading...</div>}
+                  {imageUploading && <div className="text-[#a3a380] text-sm">Uploading...</div>}
                   {imageError && <div className="text-red-500 text-sm">{imageError}</div>}
                   {imageUrl && (
                     <div className="mt-2">
-                      <img src={imageUrl} alt="Preview" className="max-h-48 rounded border border-slate-600 mx-auto" />
+                      <img src={imageUrl} alt="Preview" className="max-h-48 rounded border border-[#f5e6b2] mx-auto" />
                     </div>
                   )}
                 </div>
@@ -211,18 +224,18 @@ export default function WritePage() {
                   <Button
                     onClick={handleGetAISuggestions}
                     variant="outline"
-                    className="border-purple-500/50 text-purple-300 hover:bg-purple-500/10"
+                    className="border-[#ffb300] text-[#a3a380] hover:bg-[#fff9de]"
                     disabled={isGenerating}
                   >
-                    <Sparkles className="mr-2 h-4 w-4" />
+                    <Sparkles className="mr-2 h-4 w-4 text-[#ffb300]" />
                     {isGenerating ? "Generating..." : "Get AI Suggestions"}
                   </Button>
                   <Button
                     onClick={handleSubmit}
-                    className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
+                    className="bg-[#ffb300] text-[#3d2c00] hover:bg-[#ffd54f] font-bold shadow border border-[#f5e6b2]"
                     disabled={!title || !content || !category || isSubmitting}
                   >
-                    <Send className="mr-2 h-4 w-4" />
+                    <Send className="mr-2 h-4 w-4 text-[#3d2c00]" />
                     {isSubmitting ? "Submitting..." : "Submit for Voting"}
                   </Button>
                 </div>
@@ -232,11 +245,11 @@ export default function WritePage() {
 
           <div className="space-y-6">
             {/* Writing Tips */}
-            <Card className="bg-slate-800/50 border-slate-700">
+            <Card className="bg-white border border-[#f5e6b2]">
               <CardHeader>
-                <CardTitle className="text-white text-lg">Writing Tips</CardTitle>
+                <CardTitle className="text-[#3d2c00] text-lg">Writing Tips</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3 text-sm text-slate-300">
+              <CardContent className="space-y-3 text-sm text-[#5c4a1a] font-mono">
                 <p>• Be specific and detailed in your descriptions</p>
                 <p>• Consider how your lore connects to existing canon</p>
                 <p>• Leave room for other creators to expand upon</p>

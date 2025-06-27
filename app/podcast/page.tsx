@@ -263,45 +263,58 @@ export default function PodcastPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950/20 to-slate-950 py-8">
+    <div className="min-h-screen w-full py-8 pt-24" style={{ background: '#fff9de' }}>
       <div className="container mx-auto px-4 max-w-2xl">
-        <h1 className="text-3xl font-bold mb-6 text-center text-white">Podcast Generator</h1>
-        <p className="mb-6 text-slate-300 text-center">
+        <h1 className="text-3xl font-bold mb-6 text-center" style={{ color: '#3d2c00' }}>Podcast Generator</h1>
+        <p className="mb-6 text-center" style={{ color: '#5c4a1a', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace' }}>
           Enter a YouTube video URL or a topic. We'll turn it into a podcast-style conversation that's easy to understand and engaging!
         </p>
         {!user ? (
           <div className="text-center mt-8">
-            <Button onClick={handleSignIn}>Sign in with Google to use Podcast Generator</Button>
+            <Button onClick={handleSignIn} className="bg-[#ffb300] text-[#3d2c00] hover:bg-[#ffd966] border-none font-bold shadow-none">Sign in with Google to use Podcast Generator</Button>
           </div>
         ) : (
         <>
-        <form onSubmit={handleSubmit} className="space-y-4 bg-slate-800/60 p-6 rounded-xl shadow-lg">
+        <form onSubmit={handleSubmit} className="space-y-4 p-6 rounded-xl shadow-lg" style={{ background: '#fff9de', border: '1px solid #ffb300' }}>
           <Input
             type="text"
             placeholder="Paste YouTube URL or enter a topic (e.g. Quantum Computing, World War II)"
             value={input}
             onChange={e => setInput(e.target.value)}
-            className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
+            className="bg-[#fff9de] border-[#ffb300] text-[#3d2c00] placeholder:text-[#bfa76a] font-mono"
             required
           />
-          <Button type="submit" className="w-full" disabled={loading || !input}>
+          <Button type="submit" className="w-full bg-[#ffb300] text-[#3d2c00] hover:bg-[#ffd966] border-none font-bold shadow-none" disabled={loading || !input}>
             {loading ? "Generating..." : "Generate Podcast"}
           </Button>
         </form>
-        {error && <div className="mt-4 text-red-400 text-center">{error}</div>}
-        {saveMsg && <div className="mt-4 text-green-400 text-center">{saveMsg}</div>}
+        {error && <div className="mt-4 text-center font-mono" style={{ color: '#b30000' }}>{error}</div>}
+        {saveMsg && <div className="mt-4 text-center font-mono" style={{ color: '#1a7f37' }}>{saveMsg}</div>}
         {podcast && (
-          <div className="mt-8 bg-slate-900/80 p-6 rounded-xl shadow-lg">
-            <h2 className="text-xl font-semibold mb-2 text-blue-300">Generated Podcast</h2>
-            <div className="prose prose-invert max-w-none mb-4">
-              <ReactMarkdown>
+          <div className="mt-8 p-6 rounded-xl shadow-lg" style={{ background: '#fff9de', border: '1px solid #ffb300' }}>
+            <h2 className="text-xl font-semibold mb-2" style={{ color: '#3d2c00' }}>Generated Podcast</h2>
+            <div className="mb-4 prose max-w-none" style={{ color: '#5c4a1a', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace' }}>
+              <ReactMarkdown
+                components={{
+                  strong: ({node, ...props}) => <strong style={{ color: '#3d2c00' }} {...props} />,
+                  b: ({node, ...props}) => <b style={{ color: '#3d2c00' }} {...props} />,
+                  h1: ({node, ...props}) => <h1 style={{ color: '#3d2c00' }} {...props} />,
+                  h2: ({node, ...props}) => <h2 style={{ color: '#3d2c00' }} {...props} />,
+                  h3: ({node, ...props}) => <h3 style={{ color: '#3d2c00' }} {...props} />,
+                  h4: ({node, ...props}) => <h4 style={{ color: '#3d2c00' }} {...props} />,
+                  h5: ({node, ...props}) => <h5 style={{ color: '#3d2c00' }} {...props} />,
+                  h6: ({node, ...props}) => <h6 style={{ color: '#3d2c00' }} {...props} />,
+                  p: ({node, ...props}) => <p style={{ color: '#5c4a1a', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace' }} {...props} />,
+                  li: ({node, ...props}) => <li style={{ color: '#5c4a1a', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace' }} {...props} />,
+                }}
+              >
                 {showFullPodcast ? podcast : getPreview(podcast)}
               </ReactMarkdown>
               {(podcast.length > 500 || podcast.split("\n").length > 10) && (
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="mt-2 text-blue-400 hover:underline"
+                  className="mt-2 bg-transparent text-[#3d2c00] hover:bg-[#ffb300] hover:text-[#3d2c00] font-bold"
                   onClick={() => setShowFullPodcast((v) => !v)}
                 >
                   {showFullPodcast ? "See less" : "See more"}
@@ -313,7 +326,7 @@ export default function PodcastPage() {
                 onClick={handleSpeak}
                 variant="outline"
                 size="sm"
-                className="border-slate-600 text-slate-300 hover:bg-slate-600"
+                className="border-[#ffb300] bg-[#ffb300] text-[#3d2c00] hover:bg-[#ffd966] font-bold"
                 disabled={isLoadingAudio && !speaking}
               >
                 {isLoadingAudio && speaking ? (
@@ -335,7 +348,7 @@ export default function PodcastPage() {
                 onClick={handleStop}
                 variant="destructive"
                 size="sm"
-                className="border-slate-600 text-slate-300 hover:bg-slate-600"
+                className="border-[#ffb300] bg-[#fff9de] text-[#3d2c00] hover:bg-[#ffd966] font-bold"
                 disabled={!speaking && !isPaused}
               >
                 Stop
@@ -346,28 +359,41 @@ export default function PodcastPage() {
         {/* Past Podcasts Section */}
         {pastChats.length > 0 && (
           <div className="mt-12">
-            <h2 className="text-2xl font-bold mb-4 text-white">Past Podcasts</h2>
+            <h2 className="text-2xl font-bold mb-4" style={{ color: '#3d2c00' }}>Past Podcasts</h2>
             <div className="space-y-6">
               {pastChats.map((chat) => {
                 const isExpanded = expandedPastChats[chat.id];
                 const podcastText = chat.podcast || "";
                 return (
-                  <div key={chat.id} className="bg-slate-800/60 p-4 rounded-xl shadow border border-slate-700">
-                    <div className="text-slate-400 text-xs mb-1">
+                  <div key={chat.id} className="p-4 rounded-xl shadow border" style={{ background: '#fff9de', border: '1px solid #ffb300' }}>
+                    <div className="text-xs mb-1" style={{ color: '#bfa76a', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace' }}>
                       {chat.createdAt?.toDate ? chat.createdAt.toDate().toLocaleString() : ""}
                     </div>
-                    <div className="text-slate-300 text-sm mb-2">
-                      <b>Input:</b> {chat.input}
+                    <div className="text-sm mb-2" style={{ color: '#3d2c00' }}>
+                      <b>Input:</b> <span style={{ color: '#5c4a1a', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace' }}>{chat.input}</span>
                     </div>
-                    <div className="prose prose-invert max-w-none">
-                      <ReactMarkdown>
+                    <div className="prose max-w-none" style={{ color: '#5c4a1a', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace' }}>
+                      <ReactMarkdown
+                        components={{
+                          strong: ({node, ...props}) => <strong style={{ color: '#3d2c00' }} {...props} />,
+                          b: ({node, ...props}) => <b style={{ color: '#3d2c00' }} {...props} />,
+                          h1: ({node, ...props}) => <h1 style={{ color: '#3d2c00' }} {...props} />,
+                          h2: ({node, ...props}) => <h2 style={{ color: '#3d2c00' }} {...props} />,
+                          h3: ({node, ...props}) => <h3 style={{ color: '#3d2c00' }} {...props} />,
+                          h4: ({node, ...props}) => <h4 style={{ color: '#3d2c00' }} {...props} />,
+                          h5: ({node, ...props}) => <h5 style={{ color: '#3d2c00' }} {...props} />,
+                          h6: ({node, ...props}) => <h6 style={{ color: '#3d2c00' }} {...props} />,
+                          p: ({node, ...props}) => <p style={{ color: '#5c4a1a', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace' }} {...props} />,
+                          li: ({node, ...props}) => <li style={{ color: '#5c4a1a', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace' }} {...props} />,
+                        }}
+                      >
                         {isExpanded ? podcastText : getPreview(podcastText)}
                       </ReactMarkdown>
                       {(podcastText.length > 500 || podcastText.split("\n").length > 10) && (
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="mt-2 text-blue-400 hover:underline"
+                          className="mt-2 bg-transparent text-[#3d2c00] hover:bg-[#ffb300] hover:text-[#3d2c00] font-bold"
                           onClick={() => setExpandedPastChats((prev) => ({ ...prev, [chat.id]: !prev[chat.id] }))}
                         >
                           {isExpanded ? "See less" : "See more"}

@@ -51,25 +51,25 @@ export default function MyLorePage() {
     fetchMyStories()
   }, [user])
 
-  if (loading) return <div className="text-center py-12 text-slate-300">Loading...</div>
-  if (!user) return <div className="text-center py-12 text-slate-300">Please sign in to view your stories.</div>
+  if (loading) return <div className="text-center py-12" style={{ color: '#5c4a1a', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace' }}>Loading...</div>
+  if (!user) return <div className="text-center py-12" style={{ color: '#5c4a1a', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace' }}>Please sign in to view your stories.</div>
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 py-8">
+    <div className="min-h-screen w-full py-8 pt-24" style={{ background: '#fff9de' }}>
       <div className="container mx-auto px-4 max-w-6xl">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent mb-4">
+          <h1 className="text-4xl font-bold mb-4" style={{ color: '#3d2c00' }}>
             My Lore
           </h1>
-          <p className="text-slate-300 text-lg">Track your contributions to the universe</p>
+          <p className="text-lg" style={{ color: '#5c4a1a', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace' }}>Track your contributions to the universe</p>
         </div>
 
         <div className="grid lg:grid-cols-4 gap-8">
           {/* Profile Sidebar */}
           <div className="lg:col-span-1 space-y-6">
-            <Card className="bg-slate-800/50 border-slate-700">
+            <Card className="border" style={{ background: '#fff9de', border: '1px solid #ffb300' }}>
               <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2" style={{ color: '#3d2c00' }}>
                   <User className="h-5 w-5" />
                   Profile
                 </CardTitle>
@@ -80,23 +80,24 @@ export default function MyLorePage() {
                     <img
                       src={user.photoURL}
                       alt={user.displayName || user.email || "User"}
-                      className="w-20 h-20 rounded-full object-cover border-4 border-purple-500 shadow"
+                      className="w-20 h-20 rounded-full object-cover border-4 shadow"
+                      style={{ borderColor: '#ffb300' }}
                     />
                   ) : (
-                    <div className="w-20 h-20 rounded-full bg-slate-700 flex items-center justify-center text-3xl text-white font-bold">
+                    <div className="w-20 h-20 rounded-full flex items-center justify-center text-3xl font-bold" style={{ background: '#ffb300', color: '#3d2c00' }}>
                       {user.displayName ? user.displayName[0] : (user.email ? user.email[0] : "U")}
                     </div>
                   )}
-                  <div className="text-lg font-bold text-white">{user.displayName || user.email}</div>
+                  <div className="text-lg font-bold" style={{ color: '#3d2c00' }}>{user.displayName || user.email}</div>
                 </div>
                 <div>
-                  <p className="text-sm text-slate-400">Email</p>
-                  <p className="text-white font-mono text-sm break-all">{user.email}</p>
+                  <p className="text-sm" style={{ color: '#5c4a1a', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace' }}>Email</p>
+                  <p className="font-mono text-sm break-all" style={{ color: '#3d2c00' }}>{user.email}</p>
                 </div>
                 <Button
                   variant="outline"
                   size="sm"
-                  className="w-full border-red-500/50 text-red-400 hover:bg-red-500/10"
+                  className="w-full border-[#ffb300] bg-[#fff9de] text-[#3d2c00] hover:bg-[#ffd966] font-bold"
                 >
                   <LogOut className="mr-2 h-4 w-4" />
                   Sign Out
@@ -105,34 +106,34 @@ export default function MyLorePage() {
             </Card>
 
             {/* Stats */}
-            <Card className="bg-slate-800/50 border-slate-700">
+            <Card className="border" style={{ background: '#fff9de', border: '1px solid #ffb300' }}>
               <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
-                  <Trophy className="h-5 w-5 text-yellow-400" />
+                <CardTitle className="flex items-center gap-2" style={{ color: '#3d2c00' }}>
+                  <Trophy className="h-5 w-5" style={{ color: '#ffb300' }} />
                   Statistics
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Total Submissions</span>
-                  <span className="text-white font-semibold">{myStories.length}</span>
+                  <span style={{ color: '#5c4a1a', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace' }}>Total Submissions</span>
+                  <span className="font-semibold" style={{ color: '#3d2c00' }}>{myStories.length}</span>
                 </div>
               </CardContent>
             </Card>
 
             {/* Quick Actions */}
-            <Card className="bg-slate-800/50 border-slate-700">
+            <Card className="border" style={{ background: '#fff9de', border: '1px solid #ffb300' }}>
               <CardHeader>
-                <CardTitle className="text-white text-lg">Quick Actions</CardTitle>
+                <CardTitle className="text-lg" style={{ color: '#3d2c00' }}>Quick Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button asChild className="w-full bg-purple-600 hover:bg-purple-700">
+                <Button asChild className="w-full bg-[#ffb300] text-[#3d2c00] hover:bg-[#ffd966] border-none font-bold shadow-none">
                   <Link href="/write">
                     <Scroll className="mr-2 h-4 w-4" />
                     Write New Lore
                   </Link>
                 </Button>
-                <Button asChild variant="outline" className="w-full border-slate-600 text-slate-300 hover:bg-slate-700">
+                <Button asChild variant="outline" className="w-full border-[#ffb300] bg-[#fff9de] text-[#3d2c00] hover:bg-[#ffd966] font-bold">
                   <Link href="/lore">Browse All Lore</Link>
                 </Button>
               </CardContent>
@@ -141,35 +142,36 @@ export default function MyLorePage() {
 
           {/* Main Content */}
           <div className="lg:col-span-3">
-            <Card className="bg-slate-800/50 border-slate-700">
+            <Card className="border" style={{ background: '#fff9de', border: '1px solid #ffb300' }}>
               <CardHeader>
-                <CardTitle className="text-white">My Submissions</CardTitle>
-                <CardDescription className="text-slate-300">
+                <CardTitle style={{ color: '#3d2c00' }}>My Submissions</CardTitle>
+                <CardDescription style={{ color: '#5c4a1a', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace' }}>
                   All your lore contributions and their current status
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 {myStories.length === 0 ? (
-                  <div className="text-slate-400">You haven't submitted any stories yet.</div>
+                  <div style={{ color: '#5c4a1a', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace' }}>You haven't submitted any stories yet.</div>
                 ) : (
                   <div className="space-y-6">
                     {myStories.map((story) => (
-                      <div key={story.id} className="bg-slate-800/50 border-slate-700 rounded-lg p-6">
-                        <h2 className="text-xl font-bold text-white mb-2">{story.title}</h2>
-                        <div className="text-slate-300 mb-2">{story.category}</div>
-                        <div className="text-slate-200 whitespace-pre-line mb-2">
+                      <div key={story.id} className="rounded-lg p-6" style={{ background: '#fff9de', border: '1px solid #ffb300' }}>
+                        <h2 className="text-xl font-bold mb-2" style={{ color: '#3d2c00' }}>{story.title}</h2>
+                        <div className="mb-2" style={{ color: '#5c4a1a', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace' }}>{story.category}</div>
+                        <div className="whitespace-pre-line mb-2" style={{ color: '#5c4a1a', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace' }}>
                           {expandedStories[story.id] ? story.content : getPreview(story.content)}
                           {(story.content.length > 300 || story.content.split("\n").length > 6) && (
                             <button
-                              className="ml-2 text-purple-400 hover:underline text-xs"
+                              className="ml-2 text-xs font-bold"
+                              style={{ color: '#3d2c00' }}
                               onClick={() => setExpandedStories(prev => ({ ...prev, [story.id]: !prev[story.id] }))}
                             >
                               {expandedStories[story.id] ? "See less" : "See more"}
                             </button>
                           )}
                         </div>
-                        <div className="text-sm text-slate-400">Upvotes: {story.upvotes?.length || 0} | Downvotes: {story.downvotes?.length || 0}</div>
-                        {story.isMain && <div className="text-green-400 font-bold mt-2">MAIN STORY</div>}
+                        <div className="text-sm" style={{ color: '#bfa76a', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace' }}>Upvotes: {story.upvotes?.length || 0} | Downvotes: {story.downvotes?.length || 0}</div>
+                        {story.isMain && <div className="font-bold mt-2" style={{ color: '#1a7f37' }}>MAIN STORY</div>}
                       </div>
                     ))}
                   </div>

@@ -1,9 +1,12 @@
+"use client"
+
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Pen, Globe, ArrowRight, Sparkles, Vote, CircleIcon as Chain } from "lucide-react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
+import { useState, useEffect } from "react"
 
 const featuredEntries = [
   {
@@ -36,6 +39,24 @@ const featuredEntries = [
 ]
 
 export default function HomePage() {
+  const [typewriterText, setTypewriterText] = useState("")
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [isTyping, setIsTyping] = useState(true)
+  
+  const fullText = "AI-assisted, community-voted, immutable lore on-chain.\nCollaborative worldbuilding for the decentralized age."
+
+  useEffect(() => {
+    if (currentIndex < fullText.length) {
+      const timeout = setTimeout(() => {
+        setTypewriterText(prev => prev + fullText[currentIndex])
+        setCurrentIndex(prev => prev + 1)
+      }, 50) // Speed of typing
+      return () => clearTimeout(timeout)
+    } else {
+      setIsTyping(false)
+    }
+  }, [currentIndex, fullText])
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#fff9de] via-[#fff] to-[#fff9de] relative overflow-hidden">
       {/* Hero Section */}
@@ -43,7 +64,7 @@ export default function HomePage() {
         {/* Grid background for hero section */}
         <div className={
           cn(
-            "absolute inset-0 z-0",
+            "absolute inset-0 z-0 animate-fade-in",
             "[background-size:40px_40px]",
             "[background-image:linear-gradient(to_right,#FBE19D_1px,transparent_1px),linear-gradient(to_bottom,#FBE19D_1px,transparent_1px)]"
           )
@@ -51,7 +72,7 @@ export default function HomePage() {
         {/* Radial gradient mask for faded look */}
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-[#fff9de] [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]"></div>
         <div className="text-center w-full relative z-10">
-          <h1 className="text-6xl md:text-7xl font-bold text-[#3d2c00] mb-6">
+          <h1 className="text-6xl md:text-7xl font-bold text-[#3d2c00] mb-6 animate-fade-in-up">
             Write the {" "}
             <span
               style={{
@@ -70,11 +91,11 @@ export default function HomePage() {
             </span>
             . Together.
           </h1>
-          <p className="text-xl md:text-2xl text-[#5c4a1a] mb-8 font-mono">
-            AI-assisted, community-voted, immutable lore on-chain.<br/>
-            <span className="text-[#5c4a1a]">Collaborative worldbuilding for the decentralized age.</span>
+          <p className="text-xl md:text-2xl text-[#5c4a1a] mb-8 font-mono min-h-[4rem] animate-fade-in-up" style={{ animationDelay: '0.5s' }}>
+            <span className="whitespace-pre-line">{typewriterText}</span>
+            {isTyping && <span className="animate-pulse">|</span>}
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up" style={{ animationDelay: '1s' }}>
             <Button className="bg-[#ffb300] text-[#3d2c00] px-8 py-6 text-lg font-semibold rounded-lg shadow hover:bg-[#ffd54f]">
               Start Writing
             </Button>
@@ -88,9 +109,9 @@ export default function HomePage() {
       {/* How It Works */}
       <section className="py-24 bg-[#fff]">
         <div className="container mx-auto px-4">
-          <h2 className="text-4xl font-bold text-center mb-16 text-slate-800">How It Works</h2>
+          <h2 className="text-4xl font-bold text-center mb-16 text-slate-800 animate-fade-in-up">How It Works</h2>
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            <div className="text-center group">
+            <div className="text-center group animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
               <div className="bg-gradient-to-br from-blue-200/40 to-blue-100/40 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
                 <Pen className="h-10 w-10 text-blue-400" />
               </div>
@@ -100,7 +121,7 @@ export default function HomePage() {
                 factions, events, or objects.
               </p>
             </div>
-            <div className="text-center group">
+            <div className="text-center group animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
               <div className="bg-gradient-to-br from-green-600/20 to-emerald-600/20 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
                 <Vote className="h-10 w-10 text-green-400" />
               </div>
@@ -110,7 +131,7 @@ export default function HomePage() {
                 consensus.
               </p>
             </div>
-            <div className="text-center group">
+            <div className="text-center group animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
               <div className="bg-gradient-to-br from-cyan-600/20 to-blue-600/20 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
                 <Chain className="h-10 w-10 text-cyan-400" />
               </div>
@@ -127,7 +148,7 @@ export default function HomePage() {
       {/* Featured Canon Entries */}
       <section className="py-24 bg-[#fff9de]">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between mb-12">
+          <div className="flex items-center justify-between mb-12 animate-fade-in-up">
             <h2 className="text-4xl font-bold text-slate-900">Featured Canon</h2>
             <Button asChild className="bg-[#ffb300] text-[#3d2c00] border-none shadow hover:bg-[#ffd54f]">
               <Link href="/lore">
@@ -136,10 +157,11 @@ export default function HomePage() {
             </Button>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featuredEntries.map((entry) => (
+            {featuredEntries.map((entry, index) => (
               <Card
                 key={entry.id}
-                className="bg-white border border-[#f5e6b2] hover:border-[#ffb300] transition-colors group"
+                className="bg-white border border-[#f5e6b2] hover:border-[#ffb300] transition-colors group animate-fade-in-up"
+                style={{ animationDelay: `${0.2 * (index + 1)}s` }}
               >
                 <CardHeader>
                   <div className="flex items-start justify-between">
@@ -182,18 +204,62 @@ export default function HomePage() {
       {/* CTA Section */}
       <section className="py-24 bg-[#fff]">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-4xl font-bold mb-6 text-[#3d2c00]">Ready to Shape Reality?</h2>
-          <p className="text-xl text-[#5c4a1a] mb-8 max-w-2xl mx-auto font-mono">
+          <h2 className="text-4xl font-bold mb-6 text-[#3d2c00] animate-fade-in-up">Ready to Shape Reality?</h2>
+          <p className="text-xl text-[#5c4a1a] mb-8 max-w-2xl mx-auto font-mono animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
             Join thousands of creators building the most ambitious collaborative universe ever conceived.
           </p>
           <Button
             asChild
-            className="bg-[#ffb300] text-[#3d2c00] px-8 py-6 text-lg font-semibold rounded-lg shadow hover:bg-[#ffd54f]"
+            className="bg-[#ffb300] text-[#3d2c00] px-8 py-6 text-lg font-semibold rounded-lg shadow hover:bg-[#ffd54f] animate-fade-in-up"
+            style={{ animationDelay: '0.4s' }}
           >
             <a href="/write">Start Writing</a>
           </Button>
         </div>
       </section>
+
+      <style jsx>{`
+        @keyframes fade-in {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+        
+        @keyframes fade-in-up {
+          from {
+            opacity: 0;
+            transform: translateY(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        @keyframes glowing-gradient {
+          0% {
+            background-position: 0% 50%;
+          }
+          50% {
+            background-position: 100% 50%;
+          }
+          100% {
+            background-position: 0% 50%;
+          }
+        }
+        
+        .animate-fade-in {
+          animation: fade-in 1s ease-out;
+        }
+        
+        .animate-fade-in-up {
+          animation: fade-in-up 0.8s ease-out forwards;
+          opacity: 0;
+        }
+      `}</style>
     </div>
   )
 }
