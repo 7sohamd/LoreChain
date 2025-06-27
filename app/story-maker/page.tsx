@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import ReactMarkdown from "react-markdown";
-import { Volume2, Loader2, Square } from "lucide-react";
+import { Volume2, Loader2, Square, Mic } from "lucide-react";
 import { db, auth, provider } from "@/lib/firebase";
 import { collection, addDoc, serverTimestamp, getDocs, orderBy, query, where } from "firebase/firestore";
 import { signInWithPopup, onAuthStateChanged } from "firebase/auth";
@@ -93,6 +93,8 @@ export default function StoryMakerPage() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [search, setSearch] = useState("");
   const [expandedChatId, setExpandedChatId] = useState<string | null>(null);
+  const [listening, setListening] = useState(false);
+  const recognitionRef = useRef<any>(null);
 
   // Auth state
   useEffect(() => {
@@ -216,6 +218,49 @@ export default function StoryMakerPage() {
     }
   }
 
+  // Voice search handler
+  const handleVoiceSearch = () => {
+    if (listening) {
+      recognitionRef.current?.stop();
+      setListening(false);
+      return;
+    }
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Speech recognition is not supported in this browser. Please use Google Chrome on desktop or Android.");
+      return;
+    }
+    const recognition = new SpeechRecognition();
+    recognition.lang = "en-US";
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    recognition.onstart = () => {
+      setListening(true);
+      console.log("Speech recognition started");
+    };
+    recognition.onend = () => {
+      setListening(false);
+      console.log("Speech recognition ended");
+    };
+    recognition.onerror = (event: any) => {
+      setListening(false);
+      console.error("Speech recognition error:", event.error);
+      if (event.error === "not-allowed" || event.error === "denied") {
+        alert("Microphone access denied. Please allow microphone access in your browser settings.");
+      } else {
+        alert("Speech recognition error: " + event.error);
+      }
+    };
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      setInput(transcript);
+      setListening(false);
+      console.log("Speech recognition result:", transcript);
+    };
+    recognitionRef.current = recognition;
+    recognition.start();
+  };
+
   return (
     <div className="min-h-screen bg-[#fff9de] py-8 pt-24">
       <div className="container mx-auto px-4 max-w-2xl">
@@ -231,14 +276,24 @@ export default function StoryMakerPage() {
         <>
         <div className="mb-10 flex justify-center">
           <form onSubmit={handleSubmit} className="w-full max-w-xl bg-white border border-[#f5e6b2] p-8 rounded-2xl shadow-xl flex flex-col gap-4">
-            <Input
-              type="text"
-              placeholder="Paste YouTube URL or enter a topic (e.g. Photosynthesis, Binary Search Tree)"
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              className="bg-[#fff9de] border-2 border-[#ffb300] text-[#3d2c00] placeholder:text-[#a3a380] rounded-lg shadow-md focus:border-[#3d2c00] focus:ring-2 focus:ring-[#ffb300] transition-all text-base py-3 px-4"
-              required
-            />
+            <div className="relative flex items-center">
+              <Input
+                type="text"
+                placeholder="Paste YouTube URL or enter a topic (e.g. Photosynthesis, Binary Search Tree)"
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                className="bg-[#fff9de] border-2 border-[#ffb300] text-[#3d2c00] placeholder:text-[#a3a380] rounded-lg shadow-md focus:border-[#3d2c00] focus:ring-2 focus:ring-[#ffb300] transition-all text-base py-3 px-4 pr-12"
+                required
+              />
+              <button
+                type="button"
+                onClick={handleVoiceSearch}
+                className={`absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full border-none bg-transparent ${listening ? 'bg-[#ffb300] text-white animate-pulse' : 'text-[#ffb300] hover:bg-[#fff9de]'}`}
+                aria-label={listening ? "Listening..." : "Start voice input"}
+              >
+                <Mic className="h-6 w-6" />
+              </button>
+            </div>
             <Button type="submit" className="w-full bg-[#ffb300] text-[#3d2c00] font-bold shadow border border-[#f5e6b2] hover:bg-[#ffd54f] hover:text-[#3d2c00] rounded-lg text-lg py-3 transition-all" disabled={loading || !input}>
               {loading ? "Generating..." : "Generate Story"}
             </Button>
