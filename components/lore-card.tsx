@@ -82,7 +82,7 @@ export function LoreCard({ entry, onVote, hasUpvoted, hasDownvoted, trendingId }
   }
 
   return (
-    <Card className="bg-[#fff9de] border border-[#f5e6b2] hover:border-[#ffb300] transition-colors group h-full flex flex-col">
+    <Card className="relative z-0 bg-[#fff9de] border border-[#f5e6b2] hover:border-[#ffb300] transition-colors group h-full flex flex-col">
       {entry.id === trendingId && (
         <div className="px-3 pt-3">
           <span className="inline-block px-3 py-1 rounded-full border border-[#ffb300] text-[#ffb300] font-bold text-xs bg-[#fff9de] mb-2">TRENDING</span>
@@ -147,59 +147,61 @@ export function LoreCard({ entry, onVote, hasUpvoted, hasDownvoted, trendingId }
                 selected={!!hasDownvoted}
               />
             </div>
-            <Button asChild variant="outline" size="sm" className="ml-auto border-[#ffb300] text-[#3d2c00] bg-transparent hover:bg-[#ffb300] hover:text-[#3d2c00] font-bold rounded-lg shadow-sm transition-colors">
-              <Link href={`/lore/${entry.id}`}>
-                View {entry.isCanon ? "Canon" : "Entry"} <ArrowRight className="ml-1 h-3 w-3 text-[#3d2c00]" />
-              </Link>
-            </Button>
-            <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="ml-2 border-[#ffb300] text-[#3d2c00] bg-transparent hover:bg-[#ffb300] hover:text-[#3d2c00] font-bold rounded-lg shadow-sm transition-colors" disabled={!canTip}>
-                  Tip the Writer
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Tip the Writer</DialogTitle>
-                </DialogHeader>
-                <div className="flex flex-col gap-4">
-                  <label className="text-sm">Enter tip amount:</label>
-                  <input
-                    type="number"
-                    min={0.01}
-                    step={0.01}
-                    value={tipAmount}
-                    onChange={e => setTipAmount(Number(e.target.value))}
-                    className="border rounded px-2 py-1 bg-slate-900 text-white"
-                    disabled={tipLoading}
-                  />
-                  <label className="text-sm">Token:</label>
-                  <select value={token} onChange={e => setToken(e.target.value)} disabled={tipLoading} className="border rounded px-2 py-1 bg-slate-900 text-white">
-                    <option value="USDC">USDC</option>
-                    <option value="AVAX">AVAX</option>
-                  </select>
-                  <div className="text-xs text-slate-400">
-                    Recipient Wallet: {entry.authorWallet ? (
-                      <span className="text-green-400 font-mono">{entry.authorWallet.slice(0, 6)}...{entry.authorWallet.slice(-4)}</span>
-                    ) : (
-                      <span className="text-red-400">Not linked</span>
+            <div className="flex gap-2 ml-auto z-10">
+              <Button asChild variant="outline" size="sm" className="border-[#ffb300] text-[#3d2c00] bg-transparent hover:bg-[#ffb300] hover:text-[#3d2c00] font-bold rounded-lg shadow-sm transition-colors">
+                <Link href={`/lore/${entry.id}`}>
+                  View {entry.isCanon ? "Canon" : "Entry"} <ArrowRight className="ml-1 h-3 w-3 text-[#3d2c00]" />
+                </Link>
+              </Button>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm" className="border-[#ffb300] text-[#3d2c00] bg-transparent hover:bg-[#ffb300] hover:text-[#3d2c00] font-bold rounded-lg shadow-sm transition-colors" disabled={!canTip}>
+                    Tip the Writer
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Tip the Writer</DialogTitle>
+                  </DialogHeader>
+                  <div className="flex flex-col gap-4">
+                    <label className="text-sm">Enter tip amount:</label>
+                    <input
+                      type="number"
+                      min={0.01}
+                      step={0.01}
+                      value={tipAmount}
+                      onChange={e => setTipAmount(Number(e.target.value))}
+                      className="border rounded px-2 py-1 bg-slate-900 text-white"
+                      disabled={tipLoading}
+                    />
+                    <label className="text-sm">Token:</label>
+                    <select value={token} onChange={e => setToken(e.target.value)} disabled={tipLoading} className="border rounded px-2 py-1 bg-slate-900 text-white">
+                      <option value="USDC">USDC</option>
+                      <option value="AVAX">AVAX</option>
+                    </select>
+                    <div className="text-xs text-slate-400">
+                      Recipient Wallet: {entry.authorWallet ? (
+                        <span className="text-green-400 font-mono">{entry.authorWallet.slice(0, 6)}...{entry.authorWallet.slice(-4)}</span>
+                      ) : (
+                        <span className="text-red-400">Not linked</span>
+                      )}
+                    </div>
+                    {tipError && <div className="text-red-500 text-xs">{tipError}</div>}
+                    {tipSuccess && <div className="text-green-500 text-xs">Tip sent successfully!</div>}
+                    {txHash && (
+                      <div className="text-xs text-blue-400">
+                        Transaction: <a href={`https://testnet.snowtrace.io/tx/${txHash}`} target="_blank" rel="noopener noreferrer" className="underline">{txHash.slice(0, 10)}...{txHash.slice(-6)}</a>
+                      </div>
                     )}
                   </div>
-                  {tipError && <div className="text-red-500 text-xs">{tipError}</div>}
-                  {tipSuccess && <div className="text-green-500 text-xs">Tip sent successfully!</div>}
-                  {txHash && (
-                    <div className="text-xs text-blue-400">
-                      Transaction: <a href={`https://testnet.snowtrace.io/tx/${txHash}`} target="_blank" rel="noopener noreferrer" className="underline">{txHash.slice(0, 10)}...{txHash.slice(-6)}</a>
-                    </div>
-                  )}
-                </div>
-                <DialogFooter>
-                  <Button variant="default" className="w-full mt-2" disabled={!canTip || tipLoading} onClick={handleTip}>
-                    {tipLoading ? "Sending..." : "Confirm Tip"}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+                  <DialogFooter>
+                    <Button variant="default" className="w-full mt-2" disabled={!canTip || tipLoading} onClick={handleTip}>
+                      {tipLoading ? "Sending..." : "Confirm Tip"}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
           </div>
         </div>
       </CardContent>

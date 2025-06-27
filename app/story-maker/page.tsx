@@ -249,7 +249,7 @@ export default function StoryMakerPage() {
         {story && (
           <div className="mt-8 bg-white border border-[#f5e6b2] p-6 rounded-xl shadow-lg">
             <h2 className="text-xl font-semibold mb-2 text-[#3d2c00]">Generated Story</h2>
-            <div className="prose prose-invert max-w-none mb-4">
+            <div className="prose max-w-none mb-4 text-[#3d2c00]">
               <ReactMarkdown>{story}</ReactMarkdown>
             </div>
             <div className="flex items-center gap-2 mb-2">
