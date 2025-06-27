@@ -10,6 +10,7 @@ import { useState, useEffect } from "react"
 import { auth, db } from "@/lib/firebase"
 import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth"
 import { collection, addDoc, getDocs, query, where, updateDoc, doc, getDoc } from "firebase/firestore"
+import { PointerHighlight } from "@/components/ui/pointer-highlight"
 
 const featuredEntries = [
   {
@@ -144,30 +145,39 @@ export default function HomePage() {
           cn(
             "absolute inset-0 z-0 animate-fade-in",
             "[background-size:40px_40px]",
-            "[background-image:linear-gradient(to_right,#FBE19D_1px,transparent_1px),linear-gradient(to_bottom,#FBE19D_1px,transparent_1px)]"
+            "[background-image:linear-gradient(to_right,#f7db8f_1px,transparent_1px),linear-gradient(to_bottom,#f7db8f_1px,transparent_1px)]"
           )
         } />
         {/* Radial gradient mask for faded look */}
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-[#fff9de] [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]"></div>
         <div className="text-center w-full relative z-10">
-          <h1 className="text-6xl md:text-7xl font-bold text-[#3d2c00] mb-6 animate-fade-in-up">
-            Write the {" "}
-            <span
-              style={{
-                background: "linear-gradient(90deg,#60a5fa,#a78bfa,#fde68a,#f472b6,#fff,#60a5fa)",
-                backgroundSize: "300% 300%",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-                color: "transparent",
-                animation: "glowing-gradient 8s ease-in-out infinite",
-                filter: "drop-shadow(0 0 8px #fff9de)"
-              }}
-              className="inline-block"
-            >
-              Next Universe
-            </span>
-            . Together.
+          <h1 className="text-6xl md:text-7xl font-bold text-[#3d2c00] mb-6 animate-fade-in-up flex flex-wrap items-center justify-center gap-2 text-center">
+            <span className="mr-2">Write the</span>
+            <PointerHighlight>
+              <span
+                onClick={() => window.location.href = '/write'}
+                style={{
+                  background: "linear-gradient(90deg,#60a5fa,#a78bfa,#fde68a,#f472b6,#fff,#60a5fa)",
+                  backgroundSize: "300% 300%",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                  color: "transparent",
+                  animation: "glowing-gradient 8s ease-in-out infinite",
+                  filter: "drop-shadow(0 0 8px #fff9de)",
+                  cursor: "pointer",
+                  textDecoration: "underline"
+                }}
+                className="inline-block hover:underline cursor-pointer"
+                tabIndex={0}
+                role="button"
+                aria-label="Go to Write Page"
+                onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') window.location.href = '/write'; }}
+              >
+                Next Universe
+              </span>
+            </PointerHighlight>
+            <span className="ml-2">. Together.</span>
           </h1>
           <p className="text-xl md:text-2xl text-[#5c4a1a] mb-8 font-mono min-h-[4rem] animate-fade-in-up" style={{ animationDelay: '0.5s' }}>
             <span className="whitespace-pre-line">{typewriterText}</span>
