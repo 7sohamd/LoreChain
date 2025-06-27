@@ -1,74 +1,171 @@
-# Lorechain project
+# 🌌 LoreChain – Write the Next Universe. Together.
 
-*Automatically synced with your [v0.dev](https://v0.dev) deployments*
+*LoreChain* is a collaborative storytelling web application that blends AI assistance, blockchain-authenticated authorship, and a credit-based monetization system. Users can co-create, explore, and narrate stories that form a growing, interconnected universe.
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/amrit-codes/v0-lorechain-project)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.dev-black?style=for-the-badge)](https://v0.dev/chat/projects/MJ5dt0i0jTR)
+---
 
-## Overview
+## 🚀 Live Demo
 
-This repository will stay in sync with your deployed chats on [v0.dev](https://v0.dev).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.dev](https://v0.dev).
+👉 [Visit LoreChain Website](https://lore-chain.vercel.app)
 
-## Features
+---
 
-- **AI-Powered Lore Generation**: Generate creative lore suggestions using AI
-- **Text-to-Speech**: Listen to AI-generated suggestions with PlayHT integration
-- **Web3 Integration**: Connect with cryptocurrency wallets
-- **Modern UI**: Built with Next.js, Tailwind CSS, and shadcn/ui components
+## 🧩 Key Features
 
-## Text-to-Speech Setup
+- ✍️ *AI-Assisted Story Writing* using Google Gemini API  
+- 🔗 *Blockchain Authorship* via Ethereum wallet integration (Ethers.js + Wagmi)  
+- ✅ *Community Voting* to decide canonical stories  
+- 💰 *Credit & Referral System* for monetization and feature unlocks  
+- 🎙️ *Text-to-Speech Narration* via ElevenLabs / PlayHT  
+- 🎧 *Podcast Generator* with AI-powered dual-host simulation  
+- 🎥 *YouTube-to-Story Converter* using transcript summarization  
+- 📚 *Lore Archive* for browsing, searching, and expanding community stories  
+- 👤 *User Dashboard* to manage profile, submissions, and credits
 
-This project includes Text-to-Speech functionality using PlayHT. To enable TTS:
+---
 
-1. Sign up for a PlayHT account at [https://play.ht/studio/api-access](https://play.ht/studio/api-access)
-2. Get your User ID and API Key from the PlayHT dashboard
-3. Create a `.env.local` file in the root directory with your credentials:
+## 🛠️ Tech Stack
 
-```env
-NEXT_PUBLIC_PLAYHT_USER_ID=your_user_id_here
-NEXT_PUBLIC_PLAYHT_API_KEY=your_api_key_here
-```
+| Layer         | Tech Used                                  |
+|---------------|---------------------------------------------|
+| *Frontend*  | Next.js 15, React 18, TypeScript, Tailwind CSS |
+| *Backend*   | Firebase Firestore, Firebase Auth           |
+| *AI Services*| Google Gemini AI, ElevenLabs, PlayHT        |
+| *Blockchain*| Ethers.js, Wagmi, Viem                       |
+| *Media Tools*| ImgBB API (Image Uploads), YouTube Transcript API |
+| *UI Libraries*| Radix UI, Lucide Icons, React Markdown, Embla Carousel |
 
-4. Restart your development server
-5. Click the "Speak" button on any AI suggestion to hear it read aloud
+---
 
-## Firebase Setup
+## 📄 Pages Overview
 
-To enable Google sign-in and Firestore:
+| Page               | Route          | Description                                         |
+|--------------------|----------------|-----------------------------------------------------|
+| Homepage           | /            | Introduction, Canon highlights, CTAs                |
+| Write              | /write       | Story creation with AI and image upload             |
+| Lore Archive       | /lore        | Browse, search, and vote on community stories       |
+| Story Maker        | /story-maker | AI text + voice-based story generator               |
+| Podcast Generator  | /podcast     | AI-generated podcasts with dual-voice narration     |
+| YouTube to Story   | /youtube-story| Summarize YouTube videos into story format          |
+| My Lore            | /me          | User profile, submissions, vote stats               |
+| Monetization       | /monetization| Credits, subscriptions, referrals                   |
 
-1. Create a Firebase project at https://console.firebase.google.com/
-2. Enable Google authentication in the Authentication > Sign-in method tab.
-3. Create a Firestore database in production or test mode.
-4. Get your Firebase config from Project Settings > General > Your apps.
-5. Add the following to your `.env.local` file:
+---
 
-```env
+## 📦 Folder Structure (Main)
+
+app/
+├── write/ → Story writing interface
+├── lore/ → Lore Archive
+├── story-maker/ → AI Story + Voice
+├── podcast/ → Podcast Generator
+├── youtube-story/ → YouTube to Story
+├── me/ → User Dashboard
+├── monetization/ → Credit system
+components/ → UI components
+lib/ → Utility functions (AI, Firebase, Wallet)
+public/ → Static assets
+
+yaml
+Copy
+Edit
+
+---
+
+## 📌 Setup Instructions
+
+1. *Clone the Repository*
+
+```bash
+git clone https://github.com/yourusername/lorechain.git
+cd lorechain
+Install Dependencies
+
+bash
+Copy
+Edit
+npm install
+Setup .env.local
+
+Create a .env.local file and configure:
+
+env
+Copy
+Edit
 NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_auth_domain
 NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_storage_bucket
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
-NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
-```
+NEXT_PUBLIC_GEMINI_API_KEY=your_google_ai_key
+NEXT_PUBLIC_ELEVENLABS_API_KEY=your_elevenlabs_key
+NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your_walletconnect_id
+Run Development Server
 
-6. Restart your development server after adding the environment variables.
+bash
+Copy
+Edit
+npm run dev
+🔐 Authentication & Web3
+Uses Firebase Auth (Google Sign-In)
 
-## Deployment
+Ethereum wallet connection via Wagmi + Viem
 
-Your project is live at:
+Wallet address linked to story authorship in Firestore
 
-**[https://vercel.com/amrit-codes/v0-lorechain-project](https://vercel.com/amrit-codes/v0-lorechain-project)**
+💡 How Monetization Works
+Earn 10 credits per referral
 
-## Build your app
+Buy credits via tiered subscriptions (Starter, Pro, Unlimited)
 
-Continue building your app on:
+Credits unlock AI narration, podcast generation, and premium tools
 
-**[https://v0.dev/chat/projects/MJ5dt0i0jTR](https://v0.dev/chat/projects/MJ5dt0i0jTR)**
+🔮 Use Cases
+✍️ Creative writers and hobbyists
 
-## How It Works
+📚 Educational storytelling (learn via stories)
 
-1. Create and modify your project using [v0.dev](https://v0.dev)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+🎙️ Podcasters and content creators
+
+🧠 AI-based learning environments
+
+📖 Collaborative novel or worldbuilding communities
+
+📈 Future Roadmap
+ Mobile App (React Native)
+
+ NFT minting for canon stories
+
+ Story commenting & discussions
+
+ AI-enhanced educational stories by subject/topic
+
+ Creator leaderboards & story chains
+
+📸 Screenshots
+Add here demo GIFs/screenshots or link to demo video
+
+🤝 Contribution
+bash
+Copy
+Edit
+# Fork this repo
+# Create your feature branch (git checkout -b feature/AmazingFeature)
+# Commit your changes (git commit -m 'Add some AmazingFeature')
+# Push to the branch (git push origin feature/AmazingFeature)
+# Open a Pull Request
+📜 License
+This project is licensed under the MIT License.
+
+🔗 Useful Links
+ElevenLabs API Docs
+
+Firebase Documentation
+
+Wagmi + Viem
+
+Google Gemini AI
+
+LoreChain GitHub
+
+✉️ Contact
+Created by [Your Name]
+📧 your.email@example.com
+💼 LinkedIn
