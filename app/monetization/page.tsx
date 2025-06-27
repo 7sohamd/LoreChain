@@ -19,15 +19,11 @@ import {
   CreditCard,
   Zap
 } from "lucide-react"
-import { auth, db } from "@/lib/firebase"
-import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth"
-import { collection, addDoc, getDocs, query, where, updateDoc, doc, getDoc } from "firebase/firestore"
 import { cn } from "@/lib/utils"
 
 interface UserCredits {
   credits: number
   referralCode: string
-  referredBy?: string
   totalEarned: number
   referralsCount: number
 }
@@ -42,16 +38,16 @@ interface Subscription {
 }
 
 export default function MonetizationPage() {
-  const [user, setUser] = useState<FirebaseUser | null>(null)
-  const [loading, setLoading] = useState(true)
+  // Hardcoded user data
   const [userCredits, setUserCredits] = useState<UserCredits>({
-    credits: 0,
-    referralCode: "",
-    totalEarned: 0,
-    referralsCount: 0
+    credits: 150,
+    referralCode: "LORECHAIN123",
+    totalEarned: 200,
+    referralsCount: 5
   })
   const [copied, setCopied] = useState(false)
   const [activeTab, setActiveTab] = useState("earn")
+  const [origin, setOrigin] = useState("")
 
   const subscriptions: Subscription[] = [
     {
@@ -78,79 +74,31 @@ export default function MonetizationPage() {
     }
   ]
 
+  // Set origin on client side
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      setUser(firebaseUser)
-      setLoading(false)
-      if (firebaseUser) {
-        fetchUserCredits(firebaseUser.uid)
-      }
-    })
-    return () => unsubscribe()
+    setOrigin(window.location.origin)
   }, [])
 
-  const fetchUserCredits = async (userId: string) => {
-    try {
-      const userDoc = await getDoc(doc(db, "userCredits", userId))
-      if (userDoc.exists()) {
-        setUserCredits(userDoc.data() as UserCredits)
-      } else {
-        // Create new user credits document
-        const referralCode = generateReferralCode()
-        const newUserCredits: UserCredits = {
-          credits: 0,
-          referralCode,
-          totalEarned: 0,
-          referralsCount: 0
-        }
-        await addDoc(collection(db, "userCredits"), {
-          userId,
-          ...newUserCredits
-        })
-        setUserCredits(newUserCredits)
-      }
-    } catch (error) {
-      console.error("Error fetching user credits:", error)
-    }
-  }
-
-  const generateReferralCode = () => {
-    return Math.random().toString(36).substring(2, 8).toUpperCase()
-  }
-
   const handleCopyReferral = async () => {
-    const referralUrl = `${window.location.origin}?ref=${userCredits.referralCode}`
+    const referralUrl = `${origin}?ref=${userCredits.referralCode}`
     await navigator.clipboard.writeText(referralUrl)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
 
   const handlePurchaseCredits = async (subscription: Subscription) => {
-    if (!user) return
-    // Here you would integrate with your payment processor
+    // Simulate purchase process
     alert(`Redirecting to payment for ${subscription.name} - $${subscription.price}`)
-  }
-
-  if (loading) {
-    return <div className="text-center py-12 text-[#5c4a1a]">Loading...</div>
-  }
-
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-[#fff9de] ">
-        <div className="container mx-auto px-4 max-w-4xl">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold text-[#3d2c00] mb-4">Monetization Center</h1>
-            <p className="text-[#5c4a1a] text-lg font-mono mb-8">
-              Sign in to access your credits and start earning!
-            </p>
-            <Button className="bg-[#ffb300] text-[#3d2c00] hover:bg-[#ffd54f] font-bold">
-              Sign In to Continue
-            </Button>
-          </div>
-        </div>
-      </div>
-    )
+    
+    // Simulate credit addition after purchase
+    setTimeout(() => {
+      setUserCredits(prev => ({
+        ...prev,
+        credits: prev.credits + subscription.credits,
+        totalEarned: prev.totalEarned + subscription.credits
+      }))
+      alert(`Successfully purchased ${subscription.credits} credits!`)
+    }, 1000)
   }
 
   return (
@@ -158,13 +106,12 @@ export default function MonetizationPage() {
       {/* Dot Background */}
       <div
         className={cn(
-          "absolute inset-0",
-          "[background-size:12px_12px]",
-          "[background-image:radial-gradient(#3d2c00_1px,transparent_1px)]"
+          ""
         )} />
       
       <div className="container mx-auto px-4 max-w-6xl relative z-10">
         {/* Header */}
+        
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-[#3d2c00] mb-4">
             Monetization Center
@@ -176,7 +123,7 @@ export default function MonetizationPage() {
 
         {/* Credits Overview */}
         <div className="grid md:grid-cols-3 gap-4 mb-8">
-          <Card className="bg-white border border-[#f5e6b2]">
+          <Card className="bg-white/80 backdrop-blur-md border border-white/20 shadow-lg">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -188,7 +135,7 @@ export default function MonetizationPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white border border-[#f5e6b2]">
+          <Card className="bg-white/80 backdrop-blur-md border border-white/20 shadow-lg">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -200,7 +147,7 @@ export default function MonetizationPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white border border-[#f5e6b2]">
+          <Card className="bg-white/80 backdrop-blur-md border border-white/20 shadow-lg">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -215,17 +162,17 @@ export default function MonetizationPage() {
 
         {/* Main Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="bg-[#fff9de] border-[#f5e6b2] grid w-full grid-cols-2">
+          <TabsList className="bg-white/60 backdrop-blur-md border border-white/30 grid w-full grid-cols-2 shadow-lg">
             <TabsTrigger 
               value="earn" 
-              className="text-[#3d2c00] data-[state=active]:bg-[#ffb300] data-[state=active]:text-[#3d2c00]"
+              className="text-[#3d2c00] data-[state=active]:bg-[#ffb300]/90 data-[state=active]:text-[#3d2c00] backdrop-blur-sm"
             >
               <Gift className="mr-2 h-4 w-4" />
               Earn Credits
             </TabsTrigger>
             <TabsTrigger 
               value="buy" 
-              className="text-[#3d2c00] data-[state=active]:bg-[#ffb300] data-[state=active]:text-[#3d2c00]"
+              className="text-[#3d2c00] data-[state=active]:bg-[#ffb300]/90 data-[state=active]:text-[#3d2c00] backdrop-blur-sm"
             >
               <CreditCard className="mr-2 h-4 w-4" />
               Buy Credits
@@ -236,7 +183,7 @@ export default function MonetizationPage() {
           <TabsContent value="earn" className="space-y-6">
             <div className="grid lg:grid-cols-2 gap-6">
               {/* Referral System */}
-              <Card className="bg-white border border-[#f5e6b2]">
+              <Card className="bg-white/80 backdrop-blur-md border border-white/20 shadow-lg">
                 <CardHeader>
                   <CardTitle className="text-[#3d2c00] flex items-center gap-2">
                     <Share2 className="h-5 w-5 text-[#ffb300]" />
@@ -251,20 +198,20 @@ export default function MonetizationPage() {
                     <label className="text-sm font-medium text-[#3d2c00]">Your Referral Link</label>
                     <div className="flex gap-2">
                       <Input
-                        value={`${window.location.origin}?ref=${userCredits.referralCode}`}
+                        value={`${origin}?ref=${userCredits.referralCode}`}
                         readOnly
-                        className="bg-[#fff9de] border-[#f5e6b2] text-[#3d2c00] font-mono text-sm"
+                        className="bg-white/60 backdrop-blur-sm border border-white/30 text-[#3d2c00] font-mono text-sm shadow-inner"
                       />
                       <Button
                         onClick={handleCopyReferral}
                         variant="outline"
-                        className="border-[#ffb300] text-[#3d2c00] hover:bg-[#ffb300] hover:text-[#3d2c00]"
+                        className="border-[#ffb300] text-[#ffb300] hover:bg-[#ffb300] hover:text-[#3d2c00] transition-colors backdrop-blur-sm"
                       >
                         {copied ? <CheckCircle className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                       </Button>
                     </div>
                   </div>
-                  <div className="bg-[#fff9de] p-4 rounded-lg border border-[#f5e6b2]">
+                  <div className="bg-white/60 backdrop-blur-sm p-4 rounded-lg border border-white/30 shadow-inner">
                     <div className="flex items-center gap-2 mb-2">
                       <Star className="h-4 w-4 text-[#ffb300]" />
                       <span className="text-sm font-medium text-[#3d2c00]">How it works:</span>
@@ -280,7 +227,7 @@ export default function MonetizationPage() {
               </Card>
 
               {/* Rewards History */}
-              <Card className="bg-white border border-[#f5e6b2]">
+              <Card className="bg-white/80 backdrop-blur-md border border-white/20 shadow-lg">
                 <CardHeader>
                   <CardTitle className="text-[#3d2c00] flex items-center gap-2">
                     <Crown className="h-5 w-5 text-[#ffb300]" />
@@ -289,19 +236,33 @@ export default function MonetizationPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    <div className="flex justify-between items-center p-3 bg-[#fff9de] rounded-lg">
+                    <div className="flex justify-between items-center p-3 bg-white/60 backdrop-blur-sm rounded-lg border border-white/30 shadow-inner">
                       <div>
                         <p className="text-[#3d2c00] font-medium">Referral Bonus</p>
                         <p className="text-sm text-[#5c4a1a] font-mono">Friend signed up</p>
                       </div>
-                      <Badge className="bg-[#ffb300] text-[#3d2c00]">+10</Badge>
+                      <Badge className="bg-[#ffb300]/90 text-[#3d2c00] backdrop-blur-sm">+10</Badge>
                     </div>
-                    <div className="flex justify-between items-center p-3 bg-[#fff9de] rounded-lg">
+                    <div className="flex justify-between items-center p-3 bg-white/60 backdrop-blur-sm rounded-lg border border-white/30 shadow-inner">
                       <div>
                         <p className="text-[#3d2c00] font-medium">Welcome Bonus</p>
                         <p className="text-sm text-[#5c4a1a] font-mono">New user reward</p>
                       </div>
-                      <Badge className="bg-[#ffb300] text-[#3d2c00]">+50</Badge>
+                      <Badge className="bg-[#ffb300]/90 text-[#3d2c00] backdrop-blur-sm">+50</Badge>
+                    </div>
+                    <div className="flex justify-between items-center p-3 bg-white/60 backdrop-blur-sm rounded-lg border border-white/30 shadow-inner">
+                      <div>
+                        <p className="text-[#3d2c00] font-medium">Story Creation</p>
+                        <p className="text-sm text-[#5c4a1a] font-mono">First story bonus</p>
+                      </div>
+                      <Badge className="bg-[#ffb300]/90 text-[#3d2c00] backdrop-blur-sm">+25</Badge>
+                    </div>
+                    <div className="flex justify-between items-center p-3 bg-white/60 backdrop-blur-sm rounded-lg border border-white/30 shadow-inner">
+                      <div>
+                        <p className="text-[#3d2c00] font-medium">Canon Achievement</p>
+                        <p className="text-sm text-[#5c4a1a] font-mono">Story became canon</p>
+                      </div>
+                      <Badge className="bg-[#ffb300]/90 text-[#3d2c00] backdrop-blur-sm">+100</Badge>
                     </div>
                   </div>
                 </CardContent>
@@ -323,13 +284,13 @@ export default function MonetizationPage() {
                 <Card 
                   key={subscription.id} 
                   className={cn(
-                    "bg-white border border-[#f5e6b2] relative",
-                    subscription.popular && "border-[#ffb300] ring-2 ring-[#ffb300]/20"
+                    "bg-white/80 backdrop-blur-md border border-white/20 shadow-lg relative",
+                    subscription.popular && "border-[#ffb300]/50 ring-2 ring-[#ffb300]/20"
                   )}
                 >
                   {subscription.popular && (
                     <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                      <Badge className="bg-[#ffb300] text-[#3d2c00] font-bold">
+                      <Badge className="bg-[#ffb300]/90 text-[#3d2c00] font-bold backdrop-blur-sm">
                         Most Popular
                       </Badge>
                     </div>
@@ -356,10 +317,10 @@ export default function MonetizationPage() {
                     <Button
                       onClick={() => handlePurchaseCredits(subscription)}
                       className={cn(
-                        "w-full font-bold",
+                        "w-full font-bold backdrop-blur-sm",
                         subscription.popular
-                          ? "bg-[#ffb300] text-[#3d2c00] hover:bg-[#ffd54f]"
-                          : "bg-[#3d2c00] text-white hover:bg-[#5c4a1a]"
+                          ? "bg-[#ffb300]/90 text-[#3d2c00] hover:bg-[#ffd54f]/90"
+                          : "bg-[#3d2c00]/90 text-white hover:bg-[#5c4a1a]/90"
                       )}
                     >
                       <DollarSign className="mr-2 h-4 w-4" />
@@ -371,7 +332,7 @@ export default function MonetizationPage() {
             </div>
 
             {/* Credit Usage Info */}
-            <Card className="bg-white border border-[#f5e6b2]">
+            <Card className="bg-white/80 backdrop-blur-md border border-white/20 shadow-lg">
               <CardHeader>
                 <CardTitle className="text-[#3d2c00]">What can you do with credits?</CardTitle>
               </CardHeader>
