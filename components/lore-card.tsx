@@ -91,7 +91,7 @@ export function LoreCard({ entry, onVote, hasUpvoted, hasDownvoted, trendingId }
       <CardHeader className="flex-shrink-0">
         <div className="flex items-start justify-between gap-2">
           <div className="space-y-2 flex-1">
-            <CardTitle className="text-[#3d2c00] group-hover:text-[#ffb300] transition-colors leading-tight">
+            <CardTitle className="text-[#3d2c00] group-hover:text-[#ffb300] transition-colors leading-tight text-justify">
               {entry.title}
             </CardTitle>
             <div className="flex items-center gap-2 flex-wrap">
@@ -120,7 +120,7 @@ export function LoreCard({ entry, onVote, hasUpvoted, hasDownvoted, trendingId }
             />
           </div>
         )}
-        <CardDescription className="text-[#5c4a1a] mb-4 line-clamp-3 flex-1 font-mono">{entry.excerpt}</CardDescription>
+        <CardDescription className="text-[#5c4a1a] mb-4 line-clamp-3 flex-1 font-mono text-justify">{entry.excerpt}</CardDescription>
 
         <div className="space-y-3 mt-auto">
           <div className="flex items-center justify-between text-sm">

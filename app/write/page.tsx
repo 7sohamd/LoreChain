@@ -134,10 +134,10 @@ export default function WritePage() {
       
       <div className="container mx-auto px-4 max-w-4xl relative z-10">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-[#3d2c00] mb-4">
+          <h1 className="text-4xl font-bold text-[#3d2c00] mb-4 text-justify">
             Write New Lore
           </h1>
-          <p className="text-[#5c4a1a] text-lg font-mono">
+          <p className="text-[#5c4a1a] text-lg font-mono text-justify">
             Contribute to the ever-expanding universe. Use AI assistance to enhance your creativity.
           </p>
         </div>
@@ -150,13 +150,13 @@ export default function WritePage() {
                   <Lightbulb className="h-5 w-5 text-[#ffb300]" />
                   Lore Entry
                 </CardTitle>
-                <CardDescription className="text-[#5c4a1a] font-mono">
+                <CardDescription className="text-[#5c4a1a] font-mono text-justify">
                   Create compelling lore that expands the universe
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="title" className="text-[#3d2c00]">
+                  <Label htmlFor="title" className="text-[#3d2c00] text-justify">
                     Title
                   </Label>
                   <Input
@@ -169,7 +169,7 @@ export default function WritePage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="category" className="text-[#3d2c00]">
+                  <Label htmlFor="category" className="text-[#3d2c00] text-justify">
                     Category
                   </Label>
                   <Select value={category} onValueChange={setCategory}>
@@ -190,7 +190,7 @@ export default function WritePage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="content" className="text-[#3d2c00]">
+                  <Label htmlFor="content" className="text-[#3d2c00] text-justify">
                     Lore Content
                   </Label>
                   <Textarea
@@ -203,7 +203,7 @@ export default function WritePage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-[#3d2c00]">Attach Image (optional)</Label>
+                  <Label className="text-[#3d2c00] text-justify">Attach Image (optional)</Label>
                   <input
                     type="file"
                     accept="image/*"
@@ -247,9 +247,9 @@ export default function WritePage() {
             {/* Writing Tips */}
             <Card className="bg-white border border-[#f5e6b2]">
               <CardHeader>
-                <CardTitle className="text-[#3d2c00] text-lg">Writing Tips</CardTitle>
+                <CardTitle className="text-[#3d2c00] text-lg text-justify">Writing Tips</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3 text-sm text-[#5c4a1a] font-mono">
+              <CardContent className="space-y-3 text-sm text-[#5c4a1a] font-mono text-justify">
                 <p>• Be specific and detailed in your descriptions</p>
                 <p>• Consider how your lore connects to existing canon</p>
                 <p>• Leave room for other creators to expand upon</p>

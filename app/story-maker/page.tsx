@@ -219,8 +219,8 @@ export default function StoryMakerPage() {
   return (
     <div className="min-h-screen bg-[#fff9de] py-8 pt-24">
       <div className="container mx-auto px-4 max-w-2xl">
-        <h1 className="text-3xl font-bold mb-6 text-center text-[#3d2c00]">Story Maker (Educational)</h1>
-        <p className="mb-6 text-[#5c4a1a] text-center font-mono">
+        <h1 className="text-3xl font-bold mb-6 text-center text-[#3d2c00] text-justify">Story Maker (Educational)</h1>
+        <p className="mb-6 text-[#5c4a1a] text-center font-mono text-justify">
           Enter a YouTube video URL (any language) or just a topic name. We'll turn it into a simple story anyone can understand!
         </p>
         {!user ? (
@@ -249,7 +249,7 @@ export default function StoryMakerPage() {
         {story && (
           <div className="mt-8 bg-white border border-[#f5e6b2] p-6 rounded-xl shadow-lg">
             <h2 className="text-xl font-semibold mb-2 text-[#3d2c00]">Generated Story</h2>
-            <div className="prose max-w-none mb-4 text-[#3d2c00]">
+            <div className="prose max-w-none mb-4 text-[#3d2c00] text-justify">
               <ReactMarkdown>{story}</ReactMarkdown>
             </div>
             <div className="flex items-center gap-2 mb-2">
@@ -289,7 +289,7 @@ export default function StoryMakerPage() {
         )}
         {/* Past Chats Section */}
         <div className="mt-12">
-          <h2 className="text-2xl font-bold mb-4 text-[#3d2c00]">Past Chats</h2>
+          <h2 className="text-2xl font-bold mb-4 text-[#3d2c00] text-justify">Past Chats</h2>
           <Input
             placeholder="Search by keyword (e.g. C++, Arrays, DataStructures)"
             value={search}
@@ -323,16 +323,16 @@ export default function StoryMakerPage() {
                       <Badge key={tag} className="bg-[#fff9de] border border-[#a3a380] text-[#a3a380] font-mono">{tag}</Badge>
                     ))}
                   </div>
-                  <div className="text-[#3d2c00] font-bold text-lg mb-1">{chat.title}</div>
-                  <div className="text-[#5c4a1a] text-sm mb-2 font-mono">
+                  <div className="text-[#3d2c00] font-bold text-lg mb-1 text-justify">{chat.title}</div>
+                  <div className="text-[#5c4a1a] text-sm mb-2 font-mono text-justify">
                     <b>Input:</b> {chat.input}
                   </div>
                   {expandedChatId === chat.id ? (
-                    <div className="prose max-w-none mb-2 text-[#5c4a1a] font-mono">
+                    <div className="prose max-w-none mb-2 text-[#5c4a1a] font-mono text-justify">
                       <ReactMarkdown>{chat.story}</ReactMarkdown>
                     </div>
                   ) : (
-                    <div className="text-[#a3a380] text-sm mb-2 font-mono">
+                    <div className="text-[#a3a380] text-sm mb-2 font-mono text-justify">
                       {chat.excerpt}
                     </div>
                   )}
