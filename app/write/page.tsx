@@ -176,15 +176,15 @@ export default function WritePage() {
                     <SelectTrigger className="bg-[#fff9de] border-[#f5e6b2] text-[#3d2c00]">
                       <SelectValue placeholder="Select a category" className="text-[#3d2c00]" />
                     </SelectTrigger>
-                    <SelectContent className="bg-white border-[#f5e6b2]">
-                      <SelectItem value="mystery/crime">Mystery/Crime</SelectItem>
-                      <SelectItem value="fantasy">Fantasy</SelectItem>
-                      <SelectItem value="science fiction">Science Fiction</SelectItem>
-                      <SelectItem value="romance">Romance</SelectItem>
-                      <SelectItem value="thriller/suspense">Thriller/Suspense</SelectItem>
-                      <SelectItem value="event">Event</SelectItem>
-                      <SelectItem value="horror">Horror</SelectItem>
-                      <SelectItem value="comedy">Comedy</SelectItem>
+                    <SelectContent className="bg-white border-[#f5e6b2] text-[#3d2c00]">
+                      <SelectItem value="mystery/crime" className="text-[#3d2c00] hover:bg-[#fff9de]">Mystery/Crime</SelectItem>
+                      <SelectItem value="fantasy" className="text-[#3d2c00] hover:bg-[#fff9de]">Fantasy</SelectItem>
+                      <SelectItem value="science fiction" className="text-[#3d2c00] hover:bg-[#fff9de]">Science Fiction</SelectItem>
+                      <SelectItem value="romance" className="text-[#3d2c00] hover:bg-[#fff9de]">Romance</SelectItem>
+                      <SelectItem value="thriller/suspense" className="text-[#3d2c00] hover:bg-[#fff9de]">Thriller/Suspense</SelectItem>
+                      <SelectItem value="event" className="text-[#3d2c00] hover:bg-[#fff9de]">Event</SelectItem>
+                      <SelectItem value="horror" className="text-[#3d2c00] hover:bg-[#fff9de]">Horror</SelectItem>
+                      <SelectItem value="comedy" className="text-[#3d2c00] hover:bg-[#fff9de]">Comedy</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
