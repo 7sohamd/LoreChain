@@ -15,7 +15,7 @@ export default function YouTubeStoryPage() {
     setError("")
 
     try {
-      const res = await fetch("/api/youtube-story", {
+      const res = await fetch("/youtube-story/api", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url }),

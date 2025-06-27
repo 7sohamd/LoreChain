@@ -1,5 +1,3 @@
-// This file has been moved to app/youtube-story/api/route.ts to resolve Next.js parallel routes conflict.
-
 import { NextRequest, NextResponse } from "next/server"
 import { getTranscriptFromUrl } from "@/lib/transcript"
 import { generateStoryFromTranscript } from "@/lib/gemini"
@@ -25,4 +23,4 @@ export async function POST(req: NextRequest) {
     console.error("API error:", error)
     return NextResponse.json({ error: "Something went wrong." }, { status: 500 })
   }
-}
+} 
