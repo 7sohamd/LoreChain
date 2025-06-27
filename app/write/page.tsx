@@ -12,6 +12,7 @@ import { AIResponseBox } from "@/components/ai-response-box"
 import { auth, db } from "@/lib/firebase"
 import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth"
 import { collection, addDoc, Timestamp } from "firebase/firestore"
+import { cn } from "@/lib/utils"
 const IMGBB_API_KEY = process.env.NEXT_PUBLIC_IMGBB_API_KEY;
 
 export default function WritePage() {
@@ -118,8 +119,20 @@ export default function WritePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#fff9de] py-8 pt-24">
-      <div className="container mx-auto px-4 max-w-4xl">
+    <div className="relative min-h-screen py-8 pt-24" style={{ background: '#fff9de' }}>
+      {/* Dot Background */}
+      <div
+        className={cn(
+          "absolute inset-0",
+          "[background-size:12px_12px]",
+          "[background-image:radial-gradient(#3d2c00_1px,transparent_1px)]"
+        )} />
+      {/* Radial gradient for the container to give a faded look */}
+      <div
+        className="pointer-events-none absolute inset-0 flex items-center justify-center [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]"
+        style={{ background: '#fff9de' }}></div>
+      
+      <div className="container mx-auto px-4 max-w-4xl relative z-10">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-[#3d2c00] mb-4">
             Write New Lore
