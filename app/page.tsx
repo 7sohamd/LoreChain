@@ -3,10 +3,13 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Pen, Globe, ArrowRight, Sparkles, Vote, CircleIcon as Chain } from "lucide-react"
+import { Pen, Globe, ArrowRight, Sparkles, Vote, CircleIcon as Chain, Share2, Play, Crown } from "lucide-react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { useState, useEffect } from "react"
+import { auth, db } from "@/lib/firebase"
+import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth"
+import { collection, addDoc, getDocs, query, where, updateDoc, doc, getDoc } from "firebase/firestore"
 
 const featuredEntries = [
   {
@@ -42,6 +45,7 @@ export default function HomePage() {
   const [typewriterText, setTypewriterText] = useState("")
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isTyping, setIsTyping] = useState(true)
+  const [user, setUser] = useState<FirebaseUser | null>(null)
   
   const fullText = "AI-assisted, community-voted, immutable lore on-chain.\nCollaborative worldbuilding for the decentralized age."
 
@@ -56,6 +60,80 @@ export default function HomePage() {
       setIsTyping(false)
     }
   }, [currentIndex, fullText])
+
+  // Handle referral codes
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      setUser(firebaseUser)
+      if (firebaseUser) {
+        processReferralCode(firebaseUser.uid)
+      }
+    })
+    return () => unsubscribe()
+  }, [])
+
+  const processReferralCode = async (userId: string) => {
+    try {
+      // Check if user came from a referral link
+      const urlParams = new URLSearchParams(window.location.search)
+      const referralCode = urlParams.get('ref')
+      
+      if (!referralCode) return
+
+      // Check if user already has a referral
+      const userCreditsDoc = await getDoc(doc(db, "userCredits", userId))
+      if (userCreditsDoc.exists() && userCreditsDoc.data().referredBy) {
+        return // User already has a referral
+      }
+
+      // Find the referrer
+      const referrerQuery = query(
+        collection(db, "userCredits"),
+        where("referralCode", "==", referralCode)
+      )
+      const referrerDocs = await getDocs(referrerQuery)
+      
+      if (referrerDocs.empty) return
+      
+      const referrerDoc = referrerDocs.docs[0]
+      const referrerId = referrerDoc.id
+
+      // Update referrer's credits and referral count
+      const referrerData = referrerDoc.data()
+      await updateDoc(doc(db, "userCredits", referrerId), {
+        credits: referrerData.credits + 10,
+        totalEarned: referrerData.totalEarned + 10,
+        referralsCount: referrerData.referralsCount + 1
+      })
+
+      // Update new user's credits
+      if (userCreditsDoc.exists()) {
+        await updateDoc(doc(db, "userCredits", userId), {
+          credits: userCreditsDoc.data().credits + 10,
+          totalEarned: userCreditsDoc.data().totalEarned + 10,
+          referredBy: referrerId
+        })
+      } else {
+        // Create new user credits document
+        await addDoc(collection(db, "userCredits"), {
+          userId,
+          credits: 10,
+          totalEarned: 10,
+          referredBy: referrerId,
+          referralCode: Math.random().toString(36).substring(2, 8).toUpperCase(),
+          videosWatched: 0,
+          referralsCount: 0
+        })
+      }
+
+      // Clear the referral code from URL
+      const newUrl = window.location.pathname
+      window.history.replaceState({}, '', newUrl)
+      
+    } catch (error) {
+      console.error("Error processing referral:", error)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#fff9de] via-[#fff] to-[#fff9de] relative overflow-hidden">
@@ -141,6 +219,43 @@ export default function HomePage() {
                 part of the eternal universe.
               </p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Monetization Section */}
+      <section className="py-24 bg-[#fff9de]">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-[#3d2c00] mb-4 animate-fade-in-up">Earn While You Create</h2>
+            <p className="text-xl text-[#5c4a1a] font-mono animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+              Turn your creativity into rewards with our comprehensive monetization system
+            </p>
+          </div>
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <div className="text-center group animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+              <div className="bg-gradient-to-br from-[#ffb300]/20 to-[#ffd54f]/20 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+                <Share2 className="h-10 w-10 text-[#ffb300]" />
+              </div>
+              <h3 className="text-2xl font-semibold mb-4 text-[#3d2c00]">🎯 Refer Friends</h3>
+              <p className="text-[#5c4a1a] leading-relaxed font-mono">
+                Share your referral link and earn 10 credits for each friend who joins. Build your network and earn together!
+              </p>
+            </div>
+            <div className="text-center group animate-fade-in-up" style={{ animationDelay: '0.5s' }}>
+              <div className="bg-gradient-to-br from-[#ffb300]/20 to-[#ffd54f]/20 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+                <Crown className="h-10 w-10 text-[#ffb300]" />
+              </div>
+              <h3 className="text-2xl font-semibold mb-4 text-[#3d2c00]">💎 Premium Features</h3>
+              <p className="text-[#5c4a1a] leading-relaxed font-mono">
+                Use credits to unlock premium features, exclusive content, and advanced AI tools. 100 credits = $1 USD.
+              </p>
+            </div>
+          </div>
+          <div className="text-center mt-12 animate-fade-in-up" style={{ animationDelay: '0.7s' }}>
+            <Button asChild className="bg-[#ffb300] text-[#3d2c00] px-8 py-6 text-lg font-semibold rounded-lg shadow hover:bg-[#ffd54f]">
+              <Link href="/monetization">Start Earning Credits</Link>
+            </Button>
           </div>
         </div>
       </section>

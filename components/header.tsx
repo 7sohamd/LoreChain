@@ -47,6 +47,7 @@ export function Header() {
     { name: "Write", href: "/write" },
     { name: "Lore", href: "/lore" },
     { name: "My Lore", href: "/me" },
+    { name: "Monetization", href: "/monetization" },
     { name: "Story Maker", href: "/story-maker" },
     { name: "Podcast", href: "/podcast" },
   ]
