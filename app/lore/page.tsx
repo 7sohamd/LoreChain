@@ -100,7 +100,11 @@ export default function LorePage() {
   const trendingStoryId = Object.entries(continuationCounts).sort((a, b) => b[1] - a[1])[0]?.[0];
 
   return (
-    <div className="min-h-screen bg-[#fff9de] py-8 pt-24">
+    <div className="min-h-screen bg-[#fff9de] py-8 pt-24 relative" style={{
+      backgroundImage: `url('data:image/svg+xml;utf8,<svg width=\"20\" height=\"20\" viewBox=\"0 0 20 20\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><rect x=\"9\" y=\"9\" width=\"2\" height=\"2\" rx=\"1\" fill=\"%23ffb300\" fill-opacity=\"0.75\"/></svg>')`,
+      backgroundRepeat: 'repeat',
+      backgroundSize: '20px 20px',
+    }}>
       <div className="container mx-auto px-4">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-[#3d2c00] mb-4">
