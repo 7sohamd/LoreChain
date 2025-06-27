@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
+import { getTranscriptFromUrl } from '@/lib/transcript';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
@@ -40,9 +41,14 @@ export async function POST(req: NextRequest) {
   let prompt = '';
   if (input.startsWith('http')) {
     const videoId = extractYouTubeId(input);
+    let transcript: string | null = null;
     if (videoId) {
+      // Try to fetch transcript
+      transcript = await getTranscriptFromUrl(input);
       const meta = await fetchYouTubeTitleAndDescription(videoId);
-      if (meta) {
+      if (transcript) {
+        prompt = `Given the following YouTube video transcript, generate a simple, educational story for kids about the main topic of the video. Do not mention the transcript, extraction process, or that you are an AI. Only return the story itself.\n\nTranscript: ${transcript}`;
+      } else if (meta) {
         prompt = `Given the following YouTube video title and description, generate a simple, educational story for kids about the main topic of the video. Do not mention the transcript, extraction process, or that you are an AI. Only return the story itself.\n\nTitle: ${meta.title}\nDescription: ${meta.description}`;
       } else {
         prompt = `Given the following YouTube video URL, generate a simple, educational story for kids that explains the main topic of the video in clear, friendly language. Do not mention the transcript, extraction process, or that you are an AI. Only return the story itself.\n\nYouTube URL: ${input}`;
