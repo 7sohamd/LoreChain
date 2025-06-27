@@ -96,7 +96,7 @@ export default function AdminPage() {
   })
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 py-8">
       <div className="container mx-auto px-4 max-w-7xl">
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-4">
@@ -284,7 +284,6 @@ export default function AdminPage() {
               <TabsContent value="canon" className="space-y-4">
                 {mockCanonEntries.map((entry) => (
                   <Card key={entry.id} className="bg-slate-700/50 border-green-500/30">
-                    <CardContent className\` className="bg-slate-700/50 border-green-500/30">
                     <CardContent className="p-4">
                       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                         <div className="space-y-2">
