@@ -96,11 +96,11 @@ export default function HomePage() {
             {isTyping && <span className="animate-pulse">|</span>}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up" style={{ animationDelay: '1s' }}>
-            <Button className="bg-[#ffb300] text-[#3d2c00] px-8 py-6 text-lg font-semibold rounded-lg shadow hover:bg-[#ffd54f]">
-              Start Writing
+            <Button asChild className="bg-[#ffb300] text-[#3d2c00] px-8 py-6 text-lg font-semibold rounded-lg shadow hover:bg-[#ffd54f]">
+              <Link href="/write">Start Writing</Link>
             </Button>
-            <Button className="bg-white border border-[#ffb300] text-[#a3a380] px-8 py-6 text-lg font-semibold rounded-lg shadow hover:bg-[#fff9de]">
-              Explore Canon
+            <Button asChild className="bg-white border border-[#ffb300] text-[#a3a380] px-8 py-6 text-lg font-semibold rounded-lg shadow hover:bg-[#fff9de]">
+              <Link href="/lore">Explore Canon</Link>
             </Button>
           </div>
         </div>
