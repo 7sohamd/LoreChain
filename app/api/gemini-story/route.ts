@@ -34,7 +34,8 @@ export async function POST(req: NextRequest) {
   if (!input || typeof input !== 'string') {
     return NextResponse.json({ error: 'Missing or invalid input.' }, { status: 400 });
   }
-  if (!GEMINI_API_KEY) {
+  const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+  if (!apiKey) {
     return NextResponse.json({ error: 'Missing Gemini API key.' }, { status: 500 });
   }
 
@@ -61,7 +62,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const genAI = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+    const genAI = new GoogleGenAI({ apiKey });
     const response = await genAI.models.generateContent({
       model: MODEL,
       contents: prompt,

@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
 import { getTranscriptFromUrl } from '@/lib/transcript';
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 const MODEL = 'gemini-2.5-flash';
 
 function isYouTubeUrl(url: string) {
@@ -28,8 +27,13 @@ Now write the podcast conversation script.
 export async function POST(req: NextRequest) {
   try {
     const { input } = await req.json();
-    if (!input) {
+    if (!input || typeof input !== 'string') {
       return NextResponse.json({ error: 'Input is required' }, { status: 400 });
+    }
+
+    const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+    if (!apiKey) {
+      return NextResponse.json({ error: 'Missing Gemini API key.' }, { status: 500 });
     }
 
     let content = input;
@@ -45,30 +49,15 @@ export async function POST(req: NextRequest) {
 
     const prompt = podcastPrompt({ content });
 
-    if (GEMINI_API_KEY) {
-      const genAI = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
-      const response = await genAI.models.generateContent({
-        model: MODEL,
-        contents: prompt,
-      });
-      return NextResponse.json({ podcast: response.text || 'No podcast generated.' });
-    }
+    const genAI = new GoogleGenAI({ apiKey });
+    const response = await genAI.models.generateContent({
+      model: MODEL,
+      contents: prompt,
+    });
 
-    if (process.env.NEXT_PUBLIC_GEMINI_API) {
-      const res = await fetch(process.env.NEXT_PUBLIC_GEMINI_API, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        return NextResponse.json({ error: data.error || 'Failed to generate podcast.' }, { status: 500 });
-      }
-      return NextResponse.json({ podcast: data.response || 'No podcast generated.' });
-    }
-
-    return NextResponse.json({ error: 'Missing Gemini API key.' }, { status: 500 });
+    return NextResponse.json({ podcast: response.text || 'No podcast generated.' });
   } catch (error: any) {
-    return NextResponse.json({ error: error?.message || `Server error: ${error}` }, { status: 500 });
+    console.error('Gemini podcast error:', error);
+    return NextResponse.json({ error: error?.message || 'Failed to generate podcast.' }, { status: 500 });
   }
-} 
+}

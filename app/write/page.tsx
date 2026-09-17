@@ -41,13 +41,17 @@ export default function WritePage() {
     setIsGenerating(true)
     setShowAISuggestions(true)
     try {
-      const res = await fetch("/api/openrouter-suggest", {
+      const res = await fetch("/api/gemini-suggest", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title, content, category }),
       })
       const data = await res.json()
-      setAISuggestions(data.suggestions || ["No suggestions found."])
+      if (!res.ok) {
+        setAISuggestions([data.error || "Failed to get AI suggestions."])
+      } else {
+        setAISuggestions(data.suggestions || ["No suggestions found."])
+      }
     } catch (err) {
       setAISuggestions(["Failed to get AI suggestions."])
     }
