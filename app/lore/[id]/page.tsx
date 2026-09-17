@@ -18,7 +18,7 @@ import { useParams } from "next/navigation"
 
 export default function EntryPage() {
   const params = useParams();
-  const { id } = params;
+  const id = typeof params?.id === "string" ? params.id : Array.isArray(params?.id) ? params.id[0] : "";
   const [story, setStory] = useState<any>(null)
   const [user, setUser] = useState<FirebaseUser | null>(null)
   const [loading, setLoading] = useState(true)

@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: data.error || 'Failed to generate podcast.' }, { status: 500 });
     }
     return NextResponse.json({ podcast: data.response || 'No podcast generated.' });
-  } catch (error) {
+  } catch (error: any) {
     return NextResponse.json({ error: `Server error: ${error?.message || error}` }, { status: 500 });
   }
 } 

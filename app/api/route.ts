@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ story, fallback: usedFallback });
-  } catch (error) {
+  } catch (error: any) {
     return NextResponse.json({ error: `Server error: ${error?.message || error}` }, { status: 500 });
   }
 }
