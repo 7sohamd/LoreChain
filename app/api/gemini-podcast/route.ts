@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { GoogleGenAI } from '@google/genai';
 import { getTranscriptFromUrl } from '@/lib/transcript';
 
-const GEMINI_API_URL = process.env.NEXT_PUBLIC_GEMINI_API || "https://lorechain.onrender.com/gemini";
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+const MODEL = 'gemini-2.5-flash';
 
 function isYouTubeUrl(url: string) {
   return /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.?be)\/.+$/i.test(url.trim());
@@ -41,17 +43,32 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const res = await fetch(GEMINI_API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: podcastPrompt({ content }) }),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      return NextResponse.json({ error: data.error || 'Failed to generate podcast.' }, { status: 500 });
+    const prompt = podcastPrompt({ content });
+
+    if (GEMINI_API_KEY) {
+      const genAI = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+      const response = await genAI.models.generateContent({
+        model: MODEL,
+        contents: prompt,
+      });
+      return NextResponse.json({ podcast: response.text || 'No podcast generated.' });
     }
-    return NextResponse.json({ podcast: data.response || 'No podcast generated.' });
+
+    if (process.env.NEXT_PUBLIC_GEMINI_API) {
+      const res = await fetch(process.env.NEXT_PUBLIC_GEMINI_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        return NextResponse.json({ error: data.error || 'Failed to generate podcast.' }, { status: 500 });
+      }
+      return NextResponse.json({ podcast: data.response || 'No podcast generated.' });
+    }
+
+    return NextResponse.json({ error: 'Missing Gemini API key.' }, { status: 500 });
   } catch (error: any) {
-    return NextResponse.json({ error: `Server error: ${error?.message || error}` }, { status: 500 });
+    return NextResponse.json({ error: error?.message || `Server error: ${error}` }, { status: 500 });
   }
 } 
